@@ -14,9 +14,9 @@ Sebelum memulai, pastikan bahwa sistem kamu sudah memiliki:
 Instalasi
 Ikuti langkah-langkah di bawah ini untuk meng-clone dan menjalankan proyek ini secara lokal:
 
-Clone repository ini:
+1. Clone repository ini:
 
-bash
+```bash
 Copy code
 git clone https://github.com/username/reponame.git
 cd reponame
