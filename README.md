@@ -18,7 +18,7 @@ Ikuti langkah-langkah di bawah ini untuk meng-clone dan menjalankan proyek ini s
 
 ### 1. Clone repository ini:
 ```bash
-git clone [https://github.com/username/reponame.git](https://github.com/Seafood99/Presensi-Asrama-Komplek-M.git)
+git clone (https://github.com/Seafood99/Presensi-Asrama-Komplek-M.git)
 cd reponame
 ```
 ### 2. Install depensi:
