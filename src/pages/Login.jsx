@@ -30,7 +30,7 @@ const Login = () => {
         } else {
             setError(data.message);
         }
-    };
+    }; 
     return (
         <div className="min-h-screen flex items-center justify-center bg-teal-900">
             <div className="bg-white p-10 rounded-md shadow-md w-full max-w-sm">
