@@ -16,13 +16,13 @@ Ikuti langkah-langkah di bawah ini untuk meng-clone dan menjalankan proyek ini s
 
 1. Clone repository ini:
 
-```bash
+```bash`
 Copy code
 git clone https://github.com/username/reponame.git
 cd reponame
 Instal dependensi: Jalankan perintah berikut untuk menginstal semua dependensi yang diperlukan:
 
-bash
+```bash
 Copy code
 npm install
 atau jika menggunakan yarn:
