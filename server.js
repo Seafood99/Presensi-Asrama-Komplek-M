@@ -4,14 +4,9 @@ import cors from 'cors';
 const app = express();
 const port = 4100;
 
-// Gunakan middleware CORS
-app.use(cors());  // Ini akan mengizinkan semua origin
-
-// Middleware untuk parsing JSON
+// Gunakan middleware CORS dan parsing JSON
+app.use(cors());
 app.use(express.json());
-
-// Middleware untuk parsing JSON
-app.use(express.json()); // Menggantikan body-parser
 
 // Fungsi untuk menerjemahkan kode jenjang studi
 const getJenjangStudi = (kode) => {
@@ -26,192 +21,140 @@ const getJenjangStudi = (kode) => {
 
 // Data dummy santri dengan NIS sebagai ID login dan password default
 const santri = [
+    // Data santri Anda tetap seperti yang sudah ada...
+
+    {
+        nama: "Achmad Wijdan Rabbani",
+        nis: "240401",
+        tanggal_lahir: "1999-08-25",
+        jenjang_studi: "04",
+        tahun_masuk: "2024",
+        password: "user123",
+        role: "user"
+    },
+    {
+        nama: "Muhammad Alwi Khaidar",
+        nis: "230406",
+        tanggal_lahir: "2001-03-12",
+        jenjang_studi: "04",
+        tahun_masuk: "2023",
+        password: "user123",
+        role: "user"
+    },
+    {
+        nama: "Muslihuddin Ahmad",
+        nis: "230410",
+        tanggal_lahir: "2001-11-05",
+        jenjang_studi: "04",
+        tahun_masuk: "2023",
+        password: "user123",
+        role: "user"
+    },
+    {
+        nama: "Dhamar Galih",
+        nis: "210404",
+        tanggal_lahir: "1998-02-17",
+        jenjang_studi: "04",
+        tahun_masuk: "2021",
+        password: "user123",
+        role: "user"
+    },
+    {
+        nama: "Ahmad Finaldi",
+        nis: "220402",
+        tanggal_lahir: "2000-06-18",
+        jenjang_studi: "04",
+        tahun_masuk: "2022",
+        password: "user123",
+        role: "user"
+    },
+    {
+        nama: "Ahmad Khiznun Yuslih",
+        nis: "240402",
+        tanggal_lahir: "2000-04-20",
+        jenjang_studi: "04",
+        tahun_masuk: "2024",
+        password: "user123",
+        role: "user"
+    },
+    {
+        nama: "Muhammad Jumadil Kubro",
+        nis: "240403",
+        tanggal_lahir: "1999-09-30",
+        jenjang_studi: "04",
+        tahun_masuk: "2024",
+        password: "user123",
+        role: "user"
+    },
+    {
+        nama: "Syahirul Alim",
+        nis: "240407",
+        tanggal_lahir: "2000-12-15",
+        jenjang_studi: "04",
+        tahun_masuk: "2024",
+        password: "user123",
+        role: "user"
+    },
+    {
+        nama: "Khoiruman Wahhada",
+        nis: "210405",
+        tanggal_lahir: "2005-07-08",
+        jenjang_studi: "03",
+        tahun_masuk: "2021",
+        password: "user123",
+        role: "user"
+    },
+    {
+        nama: "Muhammad Rizqi Khoiruzzad",
+        nis: "230408",
+        tanggal_lahir: "2006-01-25",
+        jenjang_studi: "03",
+        tahun_masuk: "2023",
+        password: "user123",
+        role: "user"
+    },
     {
         nama: "Muhammad Dawam Amali",
-        nis: "2204010",
+        nis: "220411",
         tanggal_lahir: "2000-05-15",
         jenjang_studi: "04",
         tahun_masuk: "2022",
         password: "admin123",
         role: "admin"
-    },
-    {
-        nama: "Ahmad Ridho Prasetyo",
-        nis: "2203009",
-        tanggal_lahir: "1999-12-04",
-        jenjang_studi: "03",
-        tahun_masuk: "2022",
-        password: "user123",
-        role: "user"
-    },
-    {
-        nama: "Mulyono Siregar",
-        nis: "2204008",
-        tanggal_lahir: "2001-08-22",
-        jenjang_studi: "04",
-        tahun_masuk: "2022",
-        password: "user123",
-        role: "user"
-    },
-    {
-        nama: "Lutfi Hidayatullah",
-        nis: "2204007",
-        tanggal_lahir: "2000-03-11",
-        jenjang_studi: "04",
-        tahun_masuk: "2022",
-        password: "user123",
-        role: "user"
-    },
-    {
-        nama: "Sitompul Panjaitan",
-        nis: "2204006",
-        tanggal_lahir: "1998-07-19",
-        jenjang_studi: "04",
-        tahun_masuk: "2022",
-        password: "user123",
-        role: "user"
-    },
-    {
-        nama: "Rizky Firmansyah",
-        nis: "2204005",
-        tanggal_lahir: "1999-11-30",
-        jenjang_studi: "04",
-        tahun_masuk: "2022",
-        password: "user123",
-        role: "user"
-    },
-    {
-        nama: "Adzkiya Hutabarat",
-        nis: "2203004",
-        tanggal_lahir: "2000-02-14",
-        jenjang_studi: "03",
-        tahun_masuk: "2022",
-        password: "user123",
-        role: "user"
-    },
-    {
-        nama: "Andi Muhammad Putra",
-        nis: "2204003",
-        tanggal_lahir: "2001-09-25",
-        jenjang_studi: "04",
-        tahun_masuk: "2022",
-        password: "user123",
-        role: "user"
-    },
-    {
-        nama: "Dony Ramadhan",
-        nis: "2204002",
-        tanggal_lahir: "1998-06-13",
-        jenjang_studi: "04",
-        tahun_masuk: "2022",
-        password: "user123",
-        role: "user"
-    },
-    {
-        nama: "Deni Rahman",
-        nis: "2204001",
-        tanggal_lahir: "2000-10-05",
-        jenjang_studi: "04",
-        tahun_masuk: "2022",
-        password: "user123",
-        role: "user"
-    },
-    {
-        nama: "Wahyu Waluyo",
-        nis: "2103001",
-        tanggal_lahir: "1999-04-23",
-        jenjang_studi: "03",
-        tahun_masuk: "2021",
-        password: "user123",
-        role: "user"
-    },
-    {
-        nama: "Budi Setiawan",
-        nis: "2103002",
-        tanggal_lahir: "2000-01-12",
-        jenjang_studi: "03",
-        tahun_masuk: "2021",
-        password: "user123",
-        role: "user"
-    },
-    {
-        nama: "Joko Susilo",
-        nis: "2103003",
-        tanggal_lahir: "2001-07-29",
-        jenjang_studi: "03",
-        tahun_masuk: "2021",
-        password: "user123",
-        role: "user"
-    },
-    {
-        nama: "Agung Prasetyo",
-        nis: "2103004",
-        tanggal_lahir: "1999-10-18",
-        jenjang_studi: "03",
-        tahun_masuk: "2021",
-        password: "user123",
-        role: "user"
-    },
-    {
-        nama: "Umar Syahputra",
-        nis: "2103005",
-        tanggal_lahir: "1998-02-05",
-        jenjang_studi: "03",
-        tahun_masuk: "2021",
-        password: "user123",
-        role: "user"
-    },
-    {
-        nama: "Panji Prasetyo",
-        nis: "2203006",
-        tanggal_lahir: "2000-08-01",
-        jenjang_studi: "03",
-        tahun_masuk: "2022",
-        password: "user123",
-        role: "user"
-    },
-    {
-        nama: "Fajar Alamsyah",
-        nis: "2203007",
-        tanggal_lahir: "1999-12-20",
-        jenjang_studi: "03",
-        tahun_masuk: "2022",
-        password: "user123",
-        role: "user"
-    },
-    {
-        nama: "Imam Maulana",
-        nis: "2203008",
-        tanggal_lahir: "2001-11-14",
-        jenjang_studi: "03",
-        tahun_masuk: "2022",
-        password: "user123",
-        role: "user"
-    },
-    {
-        nama: "Tina Arisandi",
-        nis: "2203009",
-        tanggal_lahir: "1998-09-09",
-        jenjang_studi: "03",
-        tahun_masuk: "2022",
-        password: "user123",
-        role: "user"
-    },
-    {
-        nama: "Ali",
-        nis: "2203010",
-        tanggal_lahir: "2000-05-07",
-        jenjang_studi: "03",
-        tahun_masuk: "2022",
-        password: "user123",
-        role: "user"
-    },
+    }
+
+];
+
+// Inisialisasi data presensi
+let presensi = [
+    { id: 1, nis: "2204010", tanggal: "2024-09-18", status: "Hadir" },
+    { id: 2, nis: "2203009", tanggal: "2024-09-18", status: "Tidak Hadir" }
 ];
 
 // Fungsi untuk memvalidasi login berdasarkan NIS dan password
 const authenticateUser = (nis, password) => {
     return santri.find(s => s.nis === nis && s.password === password);
 };
+
+const isAdmin = (req, res, next) => {
+    const { nis, password } = req.body;
+
+    console.log('Request Body:', req.body); // Tambahkan log untuk mencetak request body
+
+    const user = authenticateUser(nis, password);
+    if (user && user.role === 'admin') {
+        console.log('Authenticated as admin'); // Log ketika berhasil sebagai admin
+        next();  // Jika admin, lanjutkan
+    } else {
+        console.log('Failed authentication as admin'); // Log ketika gagal autentikasi
+        res.status(403).json({ message: 'Unauthorized: Only admins can perform this action.' });
+    }
+};
+
+
+
+
+
 
 // Route untuk login
 app.post('/login', (req, res) => {
@@ -226,15 +169,60 @@ app.post('/login', (req, res) => {
     }
 });
 
-
-
-// Route untuk mengakses data dummy dengan nama jenjang studi
+// Route untuk mendapatkan data santri dengan jenjang studi
 app.get('/api/santri', (req, res) => {
     const dataDenganJenjang = santri.map(item => ({
         ...item,
         nama_jenjang_studi: getJenjangStudi(item.jenjang_studi)  // Menambahkan nama jenjang studi
     }));
     res.json(dataDenganJenjang);
+});
+
+// Route untuk mendapatkan semua data presensi
+app.get('/api/presensi', (req, res) => {
+    res.json(presensi);
+});
+
+// Route untuk menambah data presensi (hanya untuk admin)
+app.post('/api/presensi', (req, res, next) => {
+    console.log('Request Body:', req.body);  // Log request body sebelum middleware isAdmin
+    next();  // Lanjutkan ke middleware isAdmin
+}, isAdmin, (req, res) => {
+    // Log sebelum menyimpan presensi
+    console.log('Admin authenticated, saving presensi.');
+    const { nis, tanggal, status } = req.body;
+    const newPresensi = {
+        id: presensi.length + 1,
+        nis,
+        tanggal,
+        status
+    };
+    presensi.push(newPresensi);
+    res.status(201).send(newPresensi);
+});
+
+
+// Route untuk memperbarui data presensi berdasarkan ID (hanya untuk admin)
+app.put('/api/presensi/:id', isAdmin, (req, res) => {
+    const { nis, tanggal, status } = req.body;
+    const presensiIndex = presensi.findIndex(p => p.id === parseInt(req.params.id));
+    if (presensiIndex !== -1) {
+        presensi[presensiIndex] = { ...presensi[presensiIndex], nis, tanggal, status };
+        res.send(presensi[presensiIndex]);
+    } else {
+        res.status(404).send('Presensi record not found.');
+    }
+});
+
+// Route untuk menghapus data presensi berdasarkan ID (hanya untuk admin)
+app.delete('/api/presensi/:id', isAdmin, (req, res) => {
+    const presensiIndex = presensi.findIndex(p => p.id === parseInt(req.params.id));
+    if (presensiIndex !== -1) {
+        presensi.splice(presensiIndex, 1);
+        res.send({ message: 'Presensi record deleted.' });
+    } else {
+        res.status(404).send('Presensi record not found.');
+    }
 });
 
 // Route untuk root URL (menangani GET /)
