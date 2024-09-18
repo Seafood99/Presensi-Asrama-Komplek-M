@@ -1,15 +1,47 @@
 import React, { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 
-// import component
+// Import komponen
 import LogoutButton from '../components/LogoutButton';
 import Clock from '../components/Clock';
-
-
+import PresensiTable from '../components/PresensiTable';  // Import PresensiTable
 
 const Dashboard = () => {
     const [user, setUser] = useState({ name: '', role: '' });
+    const [presensiSubuh, setPresensiSubuh] = useState([]);
+    const [presensiMaghrib, setPresensiMaghrib] = useState([]);
+    const [selectedSession, setSelectedSession] = useState('subuh'); // State untuk sesi
     const navigate = useNavigate();
+
+    useEffect(() => {
+        // Ambil data presensi untuk Ngaji Ba'da Subuh
+        fetch('http://localhost:4100/api/santri')  // Anda bisa sesuaikan URL API jika perlu
+            .then(response => response.json())
+            .then(data => {
+                if (Array.isArray(data)) {
+                    const sortedSubuhData = data
+                        .filter(s => s.nama && s.nis)
+                        .map(s => ({ nama: s.nama, nis: s.nis, status: 'Hadir' }))  // Status dummy
+                        .sort((a, b) => a.nama.localeCompare(b.nama));
+                    setPresensiSubuh(sortedSubuhData);
+                }
+            })
+            .catch(error => console.error(error));
+        
+        // Ambil data presensi untuk Ngaji Ba'da Maghrib
+        fetch('http://localhost:4100/api/santri')  // Anda bisa sesuaikan URL API jika berbeda
+            .then(response => response.json())
+            .then(data => {
+                if (Array.isArray(data)) {
+                    const sortedMaghribData = data
+                        .filter(s => s.nama && s.nis)
+                        .map(s => ({ nama: s.nama, nis: s.nis, status: 'Hadir' }))  // Status dummy
+                        .sort((a, b) => a.nama.localeCompare(b.nama));
+                    setPresensiMaghrib(sortedMaghribData);
+                }
+            })
+            .catch(error => console.error(error));
+    }, []);
 
     useEffect(() => {
         // Ambil data pengguna dari localStorage
@@ -21,6 +53,9 @@ const Dashboard = () => {
             navigate('/login');
         }
     }, [navigate]);
+
+    // Tentukan data presensi yang ditampilkan berdasarkan sesi yang dipilih
+    const displayedPresensi = selectedSession === 'subuh' ? presensiSubuh : presensiMaghrib;
 
     return (
         <div className="min-h-screen bg-gray-100 flex">
@@ -34,7 +69,7 @@ const Dashboard = () => {
                 <div className="text-center mb-6">
                     <div className="w-24 h-24 bg-gray-300 rounded-full mx-auto"></div>
                     <h2 className="text-lg text-white mt-4 font-semibold">{user.name}</h2>
-                    <span className="text-sm text-white">{user.role}</span>  {/* Tampilkan role */}
+                    <span className="text-sm text-white">{user.role}</span>
                     <div className="mt-4">
                         <button className="bg-yellow-500 text-white px-4 py-1 rounded mr-2">Lihat Profil</button>
                         <button className="bg-blue-500 text-white px-4 py-1 rounded">Foto Profil</button>
@@ -56,17 +91,19 @@ const Dashboard = () => {
                             </Link>
                         </li>
                         <li className="mb-2">
-                            <Link to="/presensi" className="flex items-center p-2 hover:bg-teal-600 rounded">
+                            <Link to="/Presensi" className="flex items-center p-2 hover:bg-teal-600 rounded">
                                 <img src="src/assets/checklist.svg" alt="Logo Presensi" className="w-6 h-6 mr-2" style={{ filter: 'invert(1)' }} />
                                 <span className="text-white">Presensi</span>
                             </Link>
                         </li>
-                        <li className="mb-2">
-                            <Link to="/santri" className="flex items-center p-2 hover:bg-teal-600 rounded">
-                                <img src="src/assets/user.svg" alt="Logo Santri" className="w-6 h-6 mr-2" style={{ filter: 'invert(1)' }} />
-                                <span className="text-white">Santri</span>
-                            </Link>
-                        </li>
+                        {user.role === 'admin' && (
+                            <li className="mb-2">
+                                <Link to="/santri" className="flex items-center p-2 hover:bg-teal-600 rounded">
+                                    <img src="src/assets/user.svg" alt="Logo Santri" className="w-6 h-6 mr-2" style={{ filter: 'invert(1)' }} />
+                                    <span className="text-white">Santri</span>
+                                </Link>
+                            </li>
+                        )}
                     </ul>
                 </nav>
             </div>
@@ -85,30 +122,22 @@ const Dashboard = () => {
 
                 {/* Tombol filter presensi */}
                 <div className="mt-8 flex gap-4">
-                    <button className="bg-yellow-500 text-white px-4 py-2 rounded">Ngaji Ba'da Subuh</button>
-                    <button className="bg-blue-500 text-white px-4 py-2 rounded">Ngaji Ba'da Maghrib</button>
+                    <button 
+                        className={`bg-yellow-500 text-white px-4 py-2 rounded ${selectedSession === 'subuh' ? 'opacity-50' : ''}`}
+                        onClick={() => setSelectedSession('subuh')} // Pilih sesi Ba'da Subuh
+                    >
+                        Ngaji Ba'da Subuh
+                    </button>
+                    <button 
+                        className={`bg-blue-500 text-white px-4 py-2 rounded ${selectedSession === 'maghrib' ? 'opacity-50' : ''}`}
+                        onClick={() => setSelectedSession('maghrib')} // Pilih sesi Ba'da Maghrib
+                    >
+                        Ngaji Ba'da Maghrib
+                    </button>
                 </div>
 
-                {/* Tabel Presensi */}
-                <div className="mt-6 bg-white shadow-lg rounded-lg p-6">
-                    <h3 className="text-xl font-bold mb-4">Presensi Ba'da Subuh</h3>
-                    <table className="table-auto w-full text-left">
-                        <thead>
-                            <tr>
-                                <th className="border px-4 py-2">Nama Santri</th>
-                                <th className="border px-4 py-2">Presensi Ngaji Ba'da Subuh</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {["Ahmad Faiz", "Ahmad Faiz", "Ahmad Faiz", "Ahmad Faiz", "Ahmad Faiz"].map((name, index) => (
-                                <tr key={index}>
-                                    <td className="border px-4 py-2">{name}</td>
-                                    <td className="border px-4 py-2">Hadir</td>
-                                </tr>
-                            ))}
-                        </tbody>
-                    </table>
-                </div>
+                {/* Tampilkan tabel presensi */}
+                <PresensiTable presensi={displayedPresensi} user={user} handleStatusChange={() => {}} />  {/* Tidak ada fungsi edit */}
             </div>
         </div>
     );
