@@ -125,6 +125,7 @@ const santri = [
 
 ];
 
+
 // Inisialisasi data presensi
 let presensi = [
     { id: 1, nis: "2204010", tanggal: "2024-09-18", status: "Hadir" },
