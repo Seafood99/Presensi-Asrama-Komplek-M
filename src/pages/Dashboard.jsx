@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-
+import Cookies from 'universal-cookie';
+import { jwtDecode } from "jwt-decode";
 import AOS from 'aos';
 import 'aos/dist/aos.css';
 import Calendar from 'react-calendar';
@@ -12,6 +13,7 @@ import Clock from '../components/Clock';
 import Sidebar from '../components/Sidebar';
 
 const Dashboard = () => {
+    const cookies = new Cookies();
     const [user, setUser] = useState({ name: '', role: '' });
     const [date, setDate] = useState(new Date());
     const [presensi, setPresensi] = useState({ hadir: 0, sakit: 0, izin: 0, absen: 0 });
@@ -34,9 +36,12 @@ const Dashboard = () => {
     const navigate = useNavigate();
 
     useEffect(() => {
-        const storedUser = localStorage.getItem('user');
+        const token = cookies.get('token');
+        const user = jwtDecode(token);
+        const storedUser = user.data;
+        console.log(storedUser)
         if (storedUser) {
-            setUser(JSON.parse(storedUser));
+            setUser(storedUser);
         } else {
             navigate('/login');
         }

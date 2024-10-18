@@ -7,6 +7,7 @@ import { MdiUser } from '../components/MdiUser'; // Import MdiUser
 import Sidebar from '../components/Sidebar';
 import AOS from 'aos';
 import 'aos/dist/aos.css';
+import { useApiUrl } from '../lib/api';
 
 const SantriPage = () => {
     const [user, setUser] = useState({ name: '', role: '' });
@@ -33,7 +34,7 @@ const SantriPage = () => {
         }
 
         // Fetch data santri dari API
-        fetch('http://localhost:4100/api/santri')
+        fetch(`${useApiUrl}/api/santri`)
             .then(response => response.json())
             .then(data => {
                 setSantri(data);

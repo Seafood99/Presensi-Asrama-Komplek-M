@@ -5,6 +5,7 @@ import Clock from '../components/Clock';
 import Swal from 'sweetalert2';
 import PresensiTable from '../components/PresensiTable'; // Import komponen PresensiTable
 import Sidebar from '../components/Sidebar';
+import { useApiUrl } from '../lib/api';
 
 const PresensiPage = () => {
     const [user, setUser] = useState({ name: 'Loading...', role: '' });
@@ -21,7 +22,7 @@ const PresensiPage = () => {
         }
 
         // Fetch data santri dari API
-        fetch('http://localhost:4100/api/santri')
+        fetch(`${useApiUrl}/api/santri`)
             .then(response => response.json())
             .then(data => {
                 if (Array.isArray(data)) {
@@ -62,7 +63,7 @@ const PresensiPage = () => {
                     presensi: presensi,
                 };
 
-                fetch('http://localhost:4100/api/presensi', {
+                fetch(`${useApiUrl}/api/presensi`, {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',

@@ -22,7 +22,6 @@ const getJenjangStudi = (kode) => {
 // Data dummy santri dengan NIS sebagai ID login dan password default
 const santri = [
     // Data santri Anda tetap seperti yang sudah ada...
-
     {
         nama: "Achmad Wijdan Rabbani",
         nis: "240401",
@@ -122,7 +121,6 @@ const santri = [
         password: "admin123",
         role: "admin"
     }
-
 ];
 
 
@@ -151,11 +149,6 @@ const isAdmin = (req, res, next) => {
         res.status(403).json({ message: 'Unauthorized: Only admins can perform this action.' });
     }
 };
-
-
-
-
-
 
 // Route untuk login
 app.post('/login', (req, res) => {

@@ -1,17 +1,19 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useApiUrl } from '../lib/api';
+import Cookies from 'universal-cookie';
+import { jwtDecode } from 'jwt-decode';
 
 const Login = () => {
+    const cookies = new Cookies();
+    const navigate = useNavigate();
+    const url = useApiUrl();
     const [nis, setNis] = useState('');
     const [password, setPassword] = useState('');
     const [error, setError] = useState('');
-    const navigate = useNavigate();
-
-
     const handleLogin = async (e) => {
         e.preventDefault();
-
-        const response = await fetch('http://localhost:4100/login', {
+        const response = await fetch(`${url}/login`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'
@@ -22,10 +24,7 @@ const Login = () => {
         const data = await response.json();
 
         if (response.ok) {
-            // Simpan nama dan role pengguna ke localStorage
-            localStorage.setItem('user', JSON.stringify({ name: data.user, role: data.role }));
-
-            // Arahkan ke dashboard setelah login berhasil
+            cookies.set('token', data.token, { path: '/' });
             navigate('/dashboard');
         } else {
             setError(data.message);

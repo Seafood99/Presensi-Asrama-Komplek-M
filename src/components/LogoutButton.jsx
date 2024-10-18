@@ -1,10 +1,11 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import Swal from 'sweetalert2';
+import Cookies from 'universal-cookie';
 
 const LogoutButton = () => {
   const navigate = useNavigate();
-
+  const cookies = new Cookies();
   const handleLogout = () => {
     // Tampilkan konfirmasi menggunakan SweetAlert2
     Swal.fire({
@@ -19,8 +20,7 @@ const LogoutButton = () => {
     }).then((result) => {
       if (result.isConfirmed) {
         // Jika pengguna mengonfirmasi logout, hapus data autentikasi
-        localStorage.removeItem('token');
-        localStorage.removeItem('user');
+        cookies.remove('token', { path: '/' });
 
         // Redirect ke halaman login
         navigate('/login');
