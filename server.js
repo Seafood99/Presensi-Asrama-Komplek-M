@@ -124,19 +124,39 @@ const santri = [
     }
 
 ];
+// Fungsi untuk menghasilkan data presensi acak
+function generateRandomPresensi(santri) {
+    const presensi = [];
+    const statuses = ['Hadir', 'Sakit', 'Izin', 'Absen'];
+    const startDate = new Date('2024-09-24');
+    const endDate = new Date('2024-10-23');
 
+    let currentDate = new Date(startDate.getTime());
+    while (currentDate <= endDate) {
+        santri.forEach((s) => {
+            const status = statuses[Math.floor(Math.random() * statuses.length)];
+            presensi.push({
+                id: presensi.length + 1,
+                nis: s.nis,
+                tanggal: currentDate.toISOString().slice(0, 10),
+                status: status,
+            });
+        });
+        currentDate.setDate(currentDate.getDate() + 1);
+    }
 
-// Inisialisasi data presensi
-let presensi = [
-    { id: 1, nis: "2204010", tanggal: "2024-09-18", status: "Hadir" },
-    { id: 2, nis: "2203009", tanggal: "2024-09-18", status: "Tidak Hadir" }
-];
+    return presensi;
+}
+
+// Menghasilkan data presensi
+let presensi = generateRandomPresensi(santri);
 
 // Fungsi untuk memvalidasi login berdasarkan NIS dan password
 const authenticateUser = (nis, password) => {
     return santri.find(s => s.nis === nis && s.password === password);
 };
 
+// Middleware untuk validasi admin
 const isAdmin = (req, res, next) => {
     const { nis, password } = req.body;
 
@@ -152,9 +172,19 @@ const isAdmin = (req, res, next) => {
     }
 };
 
+// Route untuk mendapatkan data presensi berdasarkan tanggal tertentu
+app.get('/api/santri/presensi', (req, res) => {
+    const { tanggal } = req.query;
 
-
-
+    if (tanggal) {
+        // Filter data presensi berdasarkan tanggal yang diberikan
+        const filteredPresensi = presensi.filter(p => p.tanggal === tanggal);
+        res.json(filteredPresensi);
+    } else {
+        // Jika tidak ada tanggal, kembalikan semua data presensi
+        res.json(presensi);
+    }
+});
 
 
 // Route untuk login
@@ -179,17 +209,8 @@ app.get('/api/santri', (req, res) => {
     res.json(dataDenganJenjang);
 });
 
-// Route untuk mendapatkan semua data presensi
-app.get('/api/presensi', (req, res) => {
-    res.json(presensi);
-});
-
 // Route untuk menambah data presensi (hanya untuk admin)
-app.post('/api/presensi', (req, res, next) => {
-    console.log('Request Body:', req.body);  // Log request body sebelum middleware isAdmin
-    next();  // Lanjutkan ke middleware isAdmin
-}, isAdmin, (req, res) => {
-    // Log sebelum menyimpan presensi
+app.post('/api/presensi', isAdmin, (req, res) => {
     console.log('Admin authenticated, saving presensi.');
     const { nis, tanggal, status } = req.body;
     const newPresensi = {
@@ -201,7 +222,6 @@ app.post('/api/presensi', (req, res, next) => {
     presensi.push(newPresensi);
     res.status(201).send(newPresensi);
 });
-
 
 // Route untuk memperbarui data presensi berdasarkan ID (hanya untuk admin)
 app.put('/api/presensi/:id', isAdmin, (req, res) => {
@@ -224,6 +244,21 @@ app.delete('/api/presensi/:id', isAdmin, (req, res) => {
     } else {
         res.status(404).send('Presensi record not found.');
     }
+});
+
+// Route untuk summary (contoh)
+app.get("/api/summary", (req, res) => {
+    const totalSantri = santri.length;
+    const totalPresensi = presensi.length;
+    const totalHadir = presensi.filter(p => p.status === 'Hadir').length;
+    const totalTidakHadir = presensi.filter(p => p.status !== 'Hadir').length;
+
+    res.json({
+        totalSantri,
+        totalPresensi,
+        totalHadir,
+        totalTidakHadir
+    });
 });
 
 // Route untuk root URL (menangani GET /)
