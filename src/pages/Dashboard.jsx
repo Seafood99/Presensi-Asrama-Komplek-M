@@ -3,8 +3,7 @@ import { useNavigate } from 'react-router-dom';
 
 import AOS from 'aos';
 import 'aos/dist/aos.css';
-import Calendar from 'react-calendar';
-import 'react-calendar/dist/Calendar.css';
+import MyCalendar from '../components/MyCalender';
 import CountUp from 'react-countup';
 import { MdiUser } from '../components/MdiUser';
 import LogoutButton from '../components/LogoutButton';
@@ -18,7 +17,7 @@ const Dashboard = () => {
 
     const colorMap = {
         hadir: 'green',
-        sakit: 'yellow',
+        sakit: '#FCCD2A',
         izin: 'blue',
         absen: 'red'
     };
@@ -28,7 +27,6 @@ const Dashboard = () => {
             duration: 1000,
             once: true,
         });
-        handleDateChange(date);
     }, []);
 
     const navigate = useNavigate();
@@ -42,45 +40,45 @@ const Dashboard = () => {
         }
     }, [navigate]);
 
-    const handleDateChange = (newDate) => {
+    // Mengambil data presensi dari API berdasarkan tanggal
+    const handleDateChange = async (newDate) => {
         setDate(newDate);
 
-        const baseHadir = 5 + (newDate.getDate() % 3);
-        const sisa = 11 - baseHadir;
-        const randomSplit = (total, parts) => {
-            let remain = total;
-            let result = [];
-            for (let i = 0; i < parts - 1; i++) {
-                const part = Math.floor(Math.random() * (remain + 1));
-                result.push(part);
-                remain -= part;
-            }
-            result.push(remain);
-            return result;
-        };
+        try {
+            const response = await fetch(`http://localhost:4100/api/santri/presensi?tanggal=${newDate}`);
+            const data = await response.json();
 
-        new Promise((resolve) => {
-            setTimeout(() => {
-                const [sakit, izin, absen] = randomSplit(sisa, 3);
-                resolve({
-                    hadir: baseHadir,
-                    sakit,
-                    izin,
-                    absen
-                });
-            }, 300);
-        }).then((newPresensi) => {
-            setPresensi(newPresensi);
-        });
+            let total = {
+                hadir: 0,
+                sakit: 0,
+                izin: 0,
+                absen: 0
+            };
+
+            data.forEach((item) => {
+                if (item.status === 'Hadir') {
+                    total.hadir += 1;
+                } else if (item.status === 'Sakit') {
+                    total.sakit += 1;
+                } else if (item.status === 'Izin') {
+                    total.izin += 1;
+                } else if (item.status === 'Absen') {
+                    total.absen += 1;
+                }
+            });
+
+            setPresensi(total);
+        } catch (error) {
+            console.error('Error fetching attendance data:', error);
+        }
     };
 
     return (
         <div className="min-h-screen bg-gray-100 flex">
             <Sidebar user={user} />
-            
             <div className="w-3/4 p-8">
                 <div className="flex justify-between items-center">
-                    <h2 className="text-3xl font-bold">Dashboard Presensi</h2>
+                    <h2 className="text-3xl font-bold">Selamat Datang {user.name}</h2>
                     <LogoutButton />
                 </div>
                 <div className="flex justify-end mt-4">
@@ -97,9 +95,8 @@ const Dashboard = () => {
                         </div>
                     ))}
                 </div>
-
-                <div className='mt-8'>
-                    <Calendar onChange={handleDateChange} value={date} />
+                <div className="mt-8 flex justify-center">
+                    <MyCalendar changeDate={handleDateChange} nis={user.nis} role={user.role} />
                 </div>
             </div>
         </div>
