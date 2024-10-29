@@ -2,10 +2,12 @@ import express from 'express';
 import cors from 'cors';
 
 const app = express();
-const port = 4100;
+const port = process.env.PORT || 4100;
 
 // Gunakan middleware CORS dan parsing JSON
-app.use(cors());
+app.use(cors({
+    origin: 'https://presensi-asrama-komplek-m.vercel.app' // Ganti dengan URL frontend Vercel Anda
+}));
 app.use(express.json());
 
 // Fungsi untuk menerjemahkan kode jenjang studi
