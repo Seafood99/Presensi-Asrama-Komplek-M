@@ -11,7 +11,7 @@ const Login = () => {
     const handleLogin = async (e) => {
         e.preventDefault();
 
-        const response = await fetch('http://localhost:4100/login', {
+        const response = await fetch('https://presensi-asrama-komplek-m-production.up.railway.app/api/santri', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'
