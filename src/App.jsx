@@ -4,6 +4,7 @@ import Login from './pages/Login';
 import Dashboard from './pages/Dashboard';
 import Presensi from './pages/PresensiPage'; // Import halaman presensi umum
 import SantriPage from './pages/SantriPage'; // Import halaman santri
+import PanduanPage from './pages/PanduanWebsite';
 
 function App() {
   return (
@@ -14,6 +15,7 @@ function App() {
         <Route path="/dashboard" element={<Dashboard />} />
         <Route path="/presensi" element={<Presensi />} /> {/* Route untuk halaman presensi */}
         <Route path="/santri" element={<SantriPage />} /> {/* Route untuk halaman santri */}
+        <Route path="/panduan" element={<PanduanPage />} />
       </Routes>
     </Router>
   );

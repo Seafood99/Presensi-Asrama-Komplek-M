@@ -2,12 +2,10 @@ import express from 'express';
 import cors from 'cors';
 
 const app = express();
-const port = process.env.PORT || 4100;
+const port = 4100;
 
 // Gunakan middleware CORS dan parsing JSON
-app.use(cors({
-    origin: 'https://presensi-asrama-komplek-m.vercel.app' // Ganti dengan URL frontend Vercel Anda
-}));
+app.use(cors());
 app.use(express.json());
 
 // Fungsi untuk menerjemahkan kode jenjang studi
@@ -131,7 +129,7 @@ function generateRandomPresensi(santri) {
     const presensi = [];
     const statuses = ['Hadir', 'Sakit', 'Izin', 'Absen'];
     const startDate = new Date('2024-09-24');
-    const endDate = new Date('2024-10-23');
+    const endDate = new Date('2024-10-31');
 
     let currentDate = new Date(startDate.getTime());
     while (currentDate <= endDate) {
@@ -159,12 +157,35 @@ const authenticateUser = (nis, password) => {
 };
 
 // Middleware untuk validasi admin
+// const isAdmin = (req, res, next) => {
+//     const { nis, password } = req.body;
+
+//     console.log('Request Body:', req.body); // Tambahkan log untuk mencetak request body
+
+//     const user = authenticateUser(nis, password);
+//     if (user && user.role === 'admin') {
+//         console.log('Authenticated as admin'); // Log ketika berhasil sebagai admin
+//         next();  // Jika admin, lanjutkan
+//     } else {
+//         console.log('Failed authentication as admin'); // Log ketika gagal autentikasi
+//         res.status(403).json({ message: 'Unauthorized: Only admins can perform this action.' });
+//     }
+// };
+
 const isAdmin = (req, res, next) => {
     const { nis, password } = req.body;
 
-    console.log('Request Body:', req.body); // Tambahkan log untuk mencetak request body
+    console.log('Request Body:', req.body); // Log isi dari request body
 
+    // Coba cari user
     const user = authenticateUser(nis, password);
+
+    if (user) {
+        console.log('User ditemukan:', user);
+    } else {
+        console.log('User tidak ditemukan.');
+    }
+
     if (user && user.role === 'admin') {
         console.log('Authenticated as admin'); // Log ketika berhasil sebagai admin
         next();  // Jika admin, lanjutkan
@@ -173,6 +194,7 @@ const isAdmin = (req, res, next) => {
         res.status(403).json({ message: 'Unauthorized: Only admins can perform this action.' });
     }
 };
+
 
 // Route untuk mendapatkan data presensi berdasarkan tanggal tertentu
 app.get('/api/santri/presensi', (req, res) => {
@@ -195,9 +217,11 @@ app.post('/login', (req, res) => {
     const user = authenticateUser(nis, password);
 
     if (user) {
+        console.log('user authenticated', user);
         // Mengirimkan nama dan role ke frontend
         res.json({ message: 'Login berhasil', user: user.nama, role: user.role });
     } else {
+        console.log('user tidak ditemukan');
         res.status(401).json({ message: 'NIS atau password salah' });
     }
 });
@@ -212,18 +236,59 @@ app.get('/api/santri', (req, res) => {
 });
 
 // Route untuk menambah data presensi (hanya untuk admin)
+// 
+
+// app.post('/api/presensi', (req, res) => {
+//     console.log('Admin authenticated, saving presensi.');
+//     const { nis, tanggal, status } = req.body;
+//     const newPresensi = {
+//         id: presensi.length + 1,
+//         nis,
+//         tanggal,
+//         status
+//     };
+//     presensi.push(newPresensi);
+//     res.status(201).send(newPresensi);
+// });
+
 app.post('/api/presensi', isAdmin, (req, res) => {
-    console.log('Admin authenticated, saving presensi.');
-    const { nis, tanggal, status } = req.body;
-    const newPresensi = {
-        id: presensi.length + 1,
-        nis,
-        tanggal,
-        status
-    };
-    presensi.push(newPresensi);
-    res.status(201).send(newPresensi);
+    const { presensi } = req.body;
+
+    presensi.forEach(p => {
+        const newPresensi = {
+            id: presensi.length + 1,
+            nis: p.nis,
+            tanggal: p.tanggal,
+            status: p.status,
+            sesi: p.sesi // Menambahkan sesi subuh atau maghrib
+        };
+        presensi.push(newPresensi);
+    });
+
+    res.status(201).send({ message: 'Presensi saved successfully.' });
 });
+
+
+app.get('/api/santri/presensi', (req, res) => {
+    const { tanggal, sesi } = req.query;
+
+    // Jika ada parameter tanggal dan sesi
+    if (tanggal && sesi) {
+        const filteredPresensi = presensi.filter(p => p.tanggal === tanggal && p.sesi === sesi);
+        res.json(filteredPresensi);
+    }
+    // Jika hanya ada parameter tanggal
+    else if (tanggal) {
+        const filteredPresensi = presensi.filter(p => p.tanggal === tanggal);
+        res.json(filteredPresensi);
+    }
+    // Jika tidak ada parameter, kirimkan semua data presensi
+    else {
+        res.json(presensi);
+    }
+});
+
+
 
 // Route untuk memperbarui data presensi berdasarkan ID (hanya untuk admin)
 app.put('/api/presensi/:id', isAdmin, (req, res) => {

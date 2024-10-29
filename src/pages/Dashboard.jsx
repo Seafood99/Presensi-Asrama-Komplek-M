@@ -74,7 +74,7 @@ const Dashboard = () => {
     };
 
     return (
-        <div className="min-h-screen bg-gray-100 flex">
+        <div className="min-h-screen bg-gray-100 flex flex-col md:flex-row">
             <Sidebar user={user} />
             <div className="w-3/4 p-8">
                 <div className="flex justify-between items-center">

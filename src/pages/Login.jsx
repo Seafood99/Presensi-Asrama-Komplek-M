@@ -11,7 +11,7 @@ const Login = () => {
     const handleLogin = async (e) => {
         e.preventDefault();
 
-        const response = await fetch('https://presensi-asrama-komplek-m-production.up.railway.app/api/santri', {
+        const response = await fetch('http://localhost:4100/login', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'
@@ -21,16 +21,27 @@ const Login = () => {
 
         const data = await response.json();
 
+        // if (response.ok) {
+        //     // Simpan nama dan role pengguna ke localStorage
+        //     localStorage.setItem('user', JSON.stringify({ name: data.user, role: data.role }));
+
+        //     // Arahkan ke dashboard setelah login berhasil
+        //     navigate('/dashboard');
+        // } else {
+        //     setError(data.message);
+        // }
+
         if (response.ok) {
-            // Simpan nama dan role pengguna ke localStorage
-            localStorage.setItem('user', JSON.stringify({ name: data.user, role: data.role }));
+            // Simpan nama, role, dan nis pengguna ke localStorage
+            localStorage.setItem('user', JSON.stringify({ name: data.user, role: data.role, nis: nis }));
 
             // Arahkan ke dashboard setelah login berhasil
             navigate('/dashboard');
         } else {
             setError(data.message);
         }
-    }; 
+
+    };
     return (
         <div className="min-h-screen flex items-center justify-center bg-teal-900">
             <div className="bg-white p-10 rounded-md shadow-md w-full max-w-sm">
