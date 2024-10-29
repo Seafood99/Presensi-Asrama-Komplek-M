@@ -2,6 +2,7 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 
 const Sidebar = ({ user }) => {
+    const currentUrl = window.location.pathname;
     return (
         <div className="w-1/4 bg-teal-800 p-4">
             <div className="text-center mb-6">
@@ -19,27 +20,27 @@ const Sidebar = ({ user }) => {
             <nav>
                 <ul>
                     <li className="mb-2">
-                        <Link to="/dashboard" className="flex items-center p-2 hover:bg-teal-600 rounded">
-                            <img src="src/assets/home.svg" alt="Logo Home" className="w-6 h-6 mr-2" style={{ filter: 'invert(1)' }} />
+                        <Link to="/dashboard" className={`flex items-center p-2 hover:bg-teal-600 rounded ${currentUrl === '/dashboard' ? 'bg-teal-600' : ''}`}>
+                            <img src="src/assets/home.svg" alt="Logo Home" className="w-6 h-6 mr-2 invert" />
                             <span className="text-white">Dashboard</span>
                         </Link>
                     </li>
                     <li className="mb-2">
-                        <Link to="/panduan" className="flex items-center p-2 hover:bg-teal-600 rounded">
-                            <img src="src/assets/book-bookmark-fill.svg" alt="Logo Panduan" className="w-6 h-6 mr-2" style={{ filter: 'invert(1)' }} />
+                        <Link to="/panduan" className={`flex items-center p-2 hover:bg-teal-600 rounded ${currentUrl === '/' ? 'bg-teal-600' : ''}`}>
+                            <img src="src/assets/book-bookmark-fill.svg" alt="Logo Panduan" className="w-6 h-6 mr-2 invert" />
                             <span className="text-white">Panduan Website</span>
                         </Link>
                     </li>
                     <li className="mb-2">
-                        <Link to="/presensi" className="flex items-center p-2 hover:bg-teal-600 rounded">
-                            <img src="src/assets/checklist.svg" alt="Logo Presensi" className="w-6 h-6 mr-2" style={{ filter: 'invert(1)' }} />
+                        <Link to="/presensi" className={`flex items-center p-2 hover:bg-teal-600 rounded ${currentUrl === '/presensi' ? 'bg-teal-600' : ''}`}>
+                            <img src="src/assets/checklist.svg" alt="Logo Presensi" className="w-6 h-6 mr-2 invert" />
                             <span className="text-white">Presensi</span>
                         </Link>
                     </li>
                     {user.role === 'admin' && (
                         <li className="mb-2">
-                            <Link to="/santri" className="flex items-center p-2 hover:bg-teal-600 rounded">
-                                <img src="src/assets/user.svg" alt="Logo Santri" className="w-6 h-6 mr-2" style={{ filter: 'invert(1)' }} />
+                            <Link to="/santri" className={`flex items-center p-2 hover:bg-teal-600 rounded ${currentUrl === '/santri' ? 'bg-teal-600' : ''}`}>
+                                <img src="src/assets/user.svg" alt="Logo Santri" className="w-6 h-6 mr-2 invert" />
                                 <span className="text-white">Santri</span>
                             </Link>
                         </li>

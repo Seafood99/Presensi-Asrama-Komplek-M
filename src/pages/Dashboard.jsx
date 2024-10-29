@@ -30,16 +30,15 @@ const Dashboard = () => {
             duration: 1000,
             once: true,
         });
-        handleDateChange(date);
     }, []);
 
     const navigate = useNavigate();
 
     useEffect(() => {
         const token = cookies.get('token');
+        if(!token) navigate('/login');
         const user = jwtDecode(token);
         const storedUser = user.data;
-        console.log(storedUser)
         if (storedUser) {
             setUser(storedUser);
         } else {
@@ -49,7 +48,8 @@ const Dashboard = () => {
 
     const handleDateChange = (newDate) => {
         setDate(newDate);
-
+        const filter = new Date(newDate).toLocaleDateString('id-ID')
+        navigate(`/presensi?filter=${filter}`)
         const baseHadir = 5 + (newDate.getDate() % 3);
         const sisa = 11 - baseHadir;
         const randomSplit = (total, parts) => {

@@ -8,42 +8,55 @@ import Sidebar from '../components/Sidebar';
 import AOS from 'aos';
 import 'aos/dist/aos.css';
 import { useApiUrl } from '../lib/api';
+import Cookies from 'universal-cookie';
+import { jwtDecode } from "jwt-decode";
+import useSWR from 'swr';
+
+const fetcher = (url) => fetch(url).then((res) => res.json());
 
 const SantriPage = () => {
+    const url = useApiUrl();
+    const cookies = new Cookies();
     const [user, setUser] = useState({ name: '', role: '' });
-    const [totalSantri, setTotalSantri] = useState(0);
-    const [santriAktif, setSantriAktif] = useState(0);
-    const [santriNonaktif, setSantriNonaktif] = useState(0);
-    const [santri, setSantri] = useState([]);
     const navigate = useNavigate();
+    
+    // Use SWR to fetch data
+    const { data: santri, error } = useSWR(`${url}/api/santri`, fetcher, {
+        revalidateOnFocus: false,  // Re-fetch when window gets focus
+        dedupingInterval: 1000 * 60 * 5, // Avoid refetching for 5 minutes
+    });
+
+    // Calculate totalSantri, santriAktif, santriNonaktif based on fetched santri data
+    const totalSantri = santri ? santri.length : 0;
+    const santriAktif = santri ? santri.filter(s => s.tahun_masuk >= '2020').length : 0;
+    const santriNonaktif = santri ? santri.filter(s => s.tahun_masuk < '2020').length : 0;
 
     useEffect(() => {
         AOS.init({
-            duration: 1000, // durasi animasi dalam milidetik
-            once: true,     // animasi hanya terjadi sekali saat scroll
+            duration: 1000,  // animation duration in milliseconds
+            once: true,      // animation triggers only once on scroll
         });
     }, []);
 
-
     useEffect(() => {
-        const storedUser = localStorage.getItem('user');
+        const token = cookies.get('token');
+        if (!token) {
+            navigate('/login');
+            return;
+        }
+        // Decode the JWT token to get user information
+        const decodedToken = jwtDecode(token);
+        const storedUser = decodedToken.data;
+
         if (storedUser) {
-            setUser(JSON.parse(storedUser));
+            setUser(storedUser);
         } else {
             navigate('/login');
         }
-
-        // Fetch data santri dari API
-        fetch(`${useApiUrl}/api/santri`)
-            .then(response => response.json())
-            .then(data => {
-                setSantri(data);
-                setTotalSantri(data.length);
-                setSantriAktif(data.filter(s => s.tahun_masuk >= '2020').length);
-                setSantriNonaktif(data.filter(s => s.tahun_masuk < '2020').length);
-            })
-            .catch(error => console.error('Error fetching santri data:', error));
     }, [navigate]);
+
+    if (error) return <div>Error fetching santri data</div>;
+    if (!santri) return <div>Loading...</div>;
 
     return (
         <div className="min-h-screen bg-gray-100 flex">

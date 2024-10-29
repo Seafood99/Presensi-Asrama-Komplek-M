@@ -6,37 +6,45 @@ import Swal from 'sweetalert2';
 import PresensiTable from '../components/PresensiTable'; // Import komponen PresensiTable
 import Sidebar from '../components/Sidebar';
 import { useApiUrl } from '../lib/api';
+import Cookies from 'universal-cookie';
+import { jwtDecode } from "jwt-decode";
 
 const PresensiPage = () => {
+    const cookies = new Cookies();
     const [user, setUser] = useState({ name: 'Loading...', role: '' });
     const [presensi, setPresensi] = useState([]);
     const [selectedSession, setSelectedSession] = useState('subuh');
     const navigate = useNavigate();
+    const url = useApiUrl();
 
     useEffect(() => {
-        const storedUser = localStorage.getItem('user');
-        if (storedUser) {
-            setUser(JSON.parse(storedUser));
+        const token = cookies.get('token');
+        if(!token) navigate('/login');
+        const storedUser = jwtDecode(token);
+        if (storedUser.data) {
+            setUser(storedUser.data);
         } else {
             navigate('/login');
         }
-
-        // Fetch data santri dari API
-        fetch(`${useApiUrl}/api/santri`)
-            .then(response => response.json())
-            .then(data => {
+        async function fetchSantriData() {
+            try {
+                const response = await fetch(`${url}/api/santri`);
+                const data = await response.json();
                 if (Array.isArray(data)) {
                     const sortedData = data
                         .filter(s => s.nama && s.nis)
                         .map(s => ({ nama: s.nama, nis: s.nis }))
                         .sort((a, b) => a.nama.localeCompare(b.nama));
-
+                    
                     setPresensi(sortedData.map(s => ({ ...s, status: 'Hadir' })));
                 } else {
                     console.error('Invalid data structure:', data);
                 }
-            })
-            .catch(error => console.error('Error fetching santri data:', error));
+            } catch (error) {
+                console.error('Error fetching santri data:', error);
+            }
+        }
+        fetchSantriData()
     }, [navigate]);
 
     const handleStatusChange = (nis, newStatus) => {
@@ -46,7 +54,9 @@ const PresensiPage = () => {
     };
 
     const handleSavePresensi = () => {
-        const storedUser = JSON.parse(localStorage.getItem('user'));
+        const token = cookies.get('token');
+        const user = jwtDecode(token);
+        const storedUser = user.data
 
         Swal.fire({
             title: 'Apakah Anda yakin?',
@@ -63,7 +73,7 @@ const PresensiPage = () => {
                     presensi: presensi,
                 };
 
-                fetch(`${useApiUrl}/api/presensi`, {
+                fetch(`${url}/api/presensi`, {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',

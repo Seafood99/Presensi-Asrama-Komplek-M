@@ -24,6 +24,7 @@
     "react-dom": "^18.3.1",
     "react-router-dom": "^6.26.1",
     "sweetalert2": "^11.14.0",
+    "swr": "^2.2.5",
     "universal-cookie": "^7.2.1",
     "use-count-up": "^3.0.1"
   },
