@@ -1,10 +1,12 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Modal from 'react-modal';
+import Cookies from 'universal-cookie';
 
 Modal.setAppElement('#root');
 
 const Login = () => {
+    const cookies = new Cookies();
     const [nis, setNis] = useState('');
     const [password, setPassword] = useState('');
     const [showPassword, setShowPassword] = useState(false);
@@ -17,7 +19,7 @@ const Login = () => {
         e.preventDefault();
 
         try {
-            const response = await fetch('http://localhost:4100/login', {
+            const response = await fetch('http://203.194.113.18:4100/login', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
@@ -36,8 +38,7 @@ const Login = () => {
             // Pastikan struktur data yang diterima sesuai
             if (data && data.user && data.user.nama && data.user.role) {
                 // Simpan nama, role, dan nis pengguna ke localStorage
-                localStorage.setItem('user', JSON.stringify({ name: data.user.nama, role: data.user.role, nis: nis }));
-
+                cookies.set('token', data.token, { path: '/' });
                 // Arahkan ke dashboard setelah login berhasil
                 navigate('/dashboard');
             } else {
