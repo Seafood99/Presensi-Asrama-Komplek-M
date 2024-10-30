@@ -25,7 +25,6 @@ const Sidebar = ({ user }) => {
     };
 
     const handleSaveProfile = () => {
-        // Simpan perubahan profil, seperti mengunggah foto profil dan mengganti password
         Swal.fire({
             title: 'Apakah Anda yakin?',
             text: 'Anda akan menyimpan perubahan profil ini!',
@@ -53,9 +52,15 @@ const Sidebar = ({ user }) => {
                 <h2 className="text-lg text-white mt-4 font-semibold">
                     {typeof user.name === 'string' ? user.name : 'User'}
                 </h2>
-                <span className="text-sm text-white">
-                    {typeof user.role === 'string' ? user.role : 'Role Tidak Diketahui'}
-                </span>
+                <section className='flex flex-col'>
+                    <span className="text-sm text-white">
+                        {typeof user.role === 'string' ? user.role : 'Role Tidak Diketahui'}
+                    </span>
+                    <span className='text-sm text-white'>
+                        {typeof user.nis ===  'string' ? user.nis : 'NIS Tidak Diketahui'}
+
+                    </span>
+                </section>
 
                 <div className="mt-4">
                     <button
