@@ -8,12 +8,17 @@ import Sidebar from '../components/Sidebar';
 import DatePicker from 'react-datepicker';
 import 'react-datepicker/dist/react-datepicker.css';
 import Modal from 'react-modal';
+import Cookies from 'universal-cookie';
+import { jwtDecode } from "jwt-decode";
+
 
 Modal.setAppElement('#root');
 
 const PresensiPage = () => {
+    const cookies = new Cookies();
     const [user, setUser] = useState({ name: 'Loading...', role: '' });
     const [presensi, setPresensi] = useState([]);
+    const [santri, setSantri] = useState([]);
     const [selectedSession, setSelectedSession] = useState('subuh');
     const [selectedDate, setSelectedDate] = useState(new Date()); // Tanggal untuk input presensi saat ini
     const [previousPresensi, setPreviousPresensi] = useState([]); // Data presensi untuk tanggal sebelumnya
@@ -30,24 +35,28 @@ const PresensiPage = () => {
     const navigate = useNavigate();
 
     useEffect(() => {
-        const storedUser = localStorage.getItem('user');
-        if (storedUser) {
-            setUser(JSON.parse(storedUser));
+        const token = cookies.get('token');
+        if(!token) navigate('/login');
+        const storedUser = jwtDecode(token);
+        if (storedUser.data) {
+            setUser(storedUser.data);
         } else {
             navigate('/login');
         }
-
         // Fetch data santri dari API
-        fetch('http://localhost:4100/api/santri')
+        fetch('http://203.194.113.18:4100/api/santri', {headers
+            : {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${cookies.get("token")}`
+    }})
             .then(response => response.json())
             .then(data => {
-                if (Array.isArray(data)) {
-                    const sortedData = data
-                        .filter(s => s.nama && s.nis)
-                        .map(s => ({ nama: s.nama, nis: s.nis }))
-                        .sort((a, b) => a.nama.localeCompare(b.nama));
-
-                    setPresensi(sortedData.map(s => ({ ...s, status: 'Hadir' })));
+                if (Array.isArray(data.data)) {
+                    // const sortedData = data
+                    //     .filter(s => s.nama && s.nis)
+                    //     .map(s => ({ nama: s.nama, nis: s.nis }))
+                    //     .sort((a, b) => a.nama.localeCompare(b.nama));
+                    setSantri(data.data);
                 } else {
                     console.error('Invalid data structure:', data);
                 }
@@ -85,7 +94,7 @@ const PresensiPage = () => {
 
                 console.log('Request Body:', requestBody);  // Debugging untuk melihat body request
 
-                fetch('http://localhost:4100/api/presensi', {
+                fetch('http://203.194.113.18:4100/api/presensi', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
@@ -111,8 +120,13 @@ const PresensiPage = () => {
     const handleFetchPreviousPresensi = async () => {
         try {
             const formattedDate = previousDate.toISOString().split('T')[0];
-            const response = await fetch(`http://localhost:4100/api/santri/presensi?tanggal=${formattedDate}&sesi=${selectedSession}`);
+            const response = await fetch(`http://203.194.113.18:4100/api/presensi`,{
+                headers : {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${cookies.get("token")}`
+            }});
             const data = await response.json();
+            console.log(data)
             if (Array.isArray(data)) {
                 const sortedData = data
                     .filter(s => s.nama && s.nis && s.status) // Filter data yang valid
@@ -169,15 +183,7 @@ const PresensiPage = () => {
                 </div>
 
                 {/* Tabel Input Presensi */}
-                <PresensiTable presensi={presensi} user={user} handleStatusChange={handleStatusChange} />
-
-                {user.role === 'admin' && (
-                    <div className="mt-6">
-                        <button className="bg-green-500 text-white px-4 py-2 rounded" onClick={handleSavePresensi}>
-                            Simpan Presensi
-                        </button>
-                    </div>
-                )}
+                <PresensiTable presensi={santri} user={cookies.get('token')}/>
 
 
                 {user.role === 'user' && (
@@ -202,8 +208,9 @@ const PresensiPage = () => {
                 <div className="mb-4">
                     <input
                         type="text"
-                        placeholder="Nama"
+                        placeholder={user.name}
                         value={izinData.nama}
+                        disabled
                         onChange={(e) => setIzinData({ ...izinData, nama: e.target.value })}
                         className="w-full p-2 border border-gray-300 rounded-md focus:outline-none"
                     />
@@ -211,8 +218,9 @@ const PresensiPage = () => {
                 <div className="mb-4">
                     <input
                         type="text"
-                        placeholder="NIS"
+                        placeholder={user.nis}
                         value={izinData.nis}
+                        disabled
                         onChange={(e) => setIzinData({ ...izinData, nis: e.target.value })}
                         className="w-full p-2 border border-gray-300 rounded-md focus:outline-none"
                     />
