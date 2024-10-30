@@ -10,7 +10,6 @@ app.use(cors({
 }));
 
 app.use(express.json());
-
 // Fungsi untuk menerjemahkan kode jenjang studi
 const getJenjangStudi = (kode) => {
     const jenjang = {
@@ -24,6 +23,8 @@ const getJenjangStudi = (kode) => {
 
 // Data dummy santri dengan NIS sebagai ID login dan password default
 const santri = [
+    // Data santri Anda tetap seperti yang sudah ada...
+
     {
         nama: "Achmad Wijdan Rabbani",
         nis: "240401",
@@ -123,8 +124,8 @@ const santri = [
         password: "admin123",
         role: "admin"
     }
-];
 
+];
 // Fungsi untuk menghasilkan data presensi acak
 function generateRandomPresensi(santri) {
     const presensi = [];
@@ -141,7 +142,6 @@ function generateRandomPresensi(santri) {
                 nis: s.nis,
                 tanggal: currentDate.toISOString().slice(0, 10),
                 status: status,
-                sesi: 'subuh' // Atur sesi secara default, bisa ditambahkan sesi lain
             });
         });
         currentDate.setDate(currentDate.getDate() + 1);
@@ -159,6 +159,21 @@ const authenticateUser = (nis, password) => {
 };
 
 // Middleware untuk validasi admin
+// const isAdmin = (req, res, next) => {
+//     const { nis, password } = req.body;
+
+//     console.log('Request Body:', req.body); // Tambahkan log untuk mencetak request body
+
+//     const user = authenticateUser(nis, password);
+//     if (user && user.role === 'admin') {
+//         console.log('Authenticated as admin'); // Log ketika berhasil sebagai admin
+//         next();  // Jika admin, lanjutkan
+//     } else {
+//         console.log('Failed authentication as admin'); // Log ketika gagal autentikasi
+//         res.status(403).json({ message: 'Unauthorized: Only admins can perform this action.' });
+//     }
+// };
+
 const isAdmin = (req, res, next) => {
     const { nis, password } = req.body;
 
@@ -182,7 +197,80 @@ const isAdmin = (req, res, next) => {
     }
 };
 
-// Route untuk mendapatkan data presensi berdasarkan tanggal, sesi, dan NIS tertentu
+
+// Route untuk mendapatkan data presensi berdasarkan tanggal tertentu
+app.get('/api/santri/presensi', (req, res) => {
+    const { tanggal } = req.query;
+
+    if (tanggal) {
+        // Filter data presensi berdasarkan tanggal yang diberikan
+        const filteredPresensi = presensi.filter(p => p.tanggal === tanggal);
+        res.json(filteredPresensi);
+    } else {
+        // Jika tidak ada tanggal, kembalikan semua data presensi
+        res.json(presensi);
+    }
+});
+
+
+// Route untuk login
+app.post('/login', (req, res) => {
+    const { nis, password } = req.body;
+    const user = authenticateUser(nis, password);
+
+    if (user) {
+        console.log('user authenticated', user);
+        // Mengirimkan nama dan role ke frontend
+        res.json({ message: 'Login berhasil', user: user.nama, role: user.role });
+    } else {
+        console.log('user tidak ditemukan');
+        res.status(401).json({ message: 'NIS atau password salah' });
+    }
+});
+
+// Route untuk mendapatkan data santri dengan jenjang studi
+app.get('/api/santri', (req, res) => {
+    const dataDenganJenjang = santri.map(item => ({
+        ...item,
+        nama_jenjang_studi: getJenjangStudi(item.jenjang_studi)  // Menambahkan nama jenjang studi
+    }));
+    res.json(dataDenganJenjang);
+});
+
+// Route untuk menambah data presensi (hanya untuk admin)
+// 
+
+// app.post('/api/presensi', (req, res) => {
+//     console.log('Admin authenticated, saving presensi.');
+//     const { nis, tanggal, status } = req.body;
+//     const newPresensi = {
+//         id: presensi.length + 1,
+//         nis,
+//         tanggal,
+//         status
+//     };
+//     presensi.push(newPresensi);
+//     res.status(201).send(newPresensi);
+// });
+
+app.post('/api/presensi', isAdmin, (req, res) => {
+    const { presensi } = req.body;
+
+    presensi.forEach(p => {
+        const newPresensi = {
+            id: presensi.length + 1,
+            nis: p.nis,
+            tanggal: p.tanggal,
+            status: p.status,
+            sesi: p.sesi // Menambahkan sesi subuh atau maghrib
+        };
+        presensi.push(newPresensi);
+    });
+
+    res.status(201).send({ message: 'Presensi saved successfully.' });
+});
+
+
 app.get('/api/santri/presensi', (req, res) => {
     const { tanggal, sesi, nis } = req.query;
 
@@ -203,54 +291,14 @@ app.get('/api/santri/presensi', (req, res) => {
     res.json(filteredPresensi);
 });
 
-// Route untuk login
-app.post('/login', (req, res) => {
-    const { nis, password } = req.body;
-    const user = authenticateUser(nis, password);
 
-    if (user) {
-        console.log('user authenticated', user);
-        // Mengirimkan nama dan role ke frontend
-        res.json({ message: 'Login berhasil', user: { nama: user.nama, role: user.role, nis: user.nis } });
-    } else {
-        console.log('user tidak ditemukan');
-        res.status(401).json({ message: 'NIS atau password salah' });
-    }
-});
-
-// Route untuk mendapatkan data santri dengan jenjang studi
-app.get('/api/santri', (req, res) => {
-    const dataDenganJenjang = santri.map(item => ({
-        ...item,
-        nama_jenjang_studi: getJenjangStudi(item.jenjang_studi)  // Menambahkan nama jenjang studi
-    }));
-    res.json(dataDenganJenjang);
-});
-
-// Route untuk menambah data presensi (hanya untuk admin)
-app.post('/api/presensi', isAdmin, (req, res) => {
-    const { presensi: newPresensiData } = req.body;
-
-    newPresensiData.forEach(p => {
-        const newPresensi = {
-            id: presensi.length + 1,
-            nis: p.nis,
-            tanggal: p.tanggal,
-            status: p.status,
-            sesi: p.sesi // Menambahkan sesi subuh atau maghrib
-        };
-        presensi.push(newPresensi);
-    });
-
-    res.status(201).send({ message: 'Presensi saved successfully.' });
-});
 
 // Route untuk memperbarui data presensi berdasarkan ID (hanya untuk admin)
 app.put('/api/presensi/:id', isAdmin, (req, res) => {
-    const { nis, tanggal, status, sesi } = req.body;
+    const { nis, tanggal, status } = req.body;
     const presensiIndex = presensi.findIndex(p => p.id === parseInt(req.params.id));
     if (presensiIndex !== -1) {
-        presensi[presensiIndex] = { ...presensi[presensiIndex], nis, tanggal, status, sesi };
+        presensi[presensiIndex] = { ...presensi[presensiIndex], nis, tanggal, status };
         res.send(presensi[presensiIndex]);
     } else {
         res.status(404).send('Presensi record not found.');
