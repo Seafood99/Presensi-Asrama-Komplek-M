@@ -7,85 +7,87 @@ import { MdiUser } from '../components/MdiUser'; // Import MdiUser
 import Sidebar from '../components/Sidebar';
 import AOS from 'aos';
 import 'aos/dist/aos.css';
+import Cookies from 'universal-cookie';
+import {jwtDecode} from "jwt-decode";
+import useSWR from 'swr';
 
 const SantriPage = () => {
+    const url = "http://203.194.113.18:4100";
+    const cookies = new Cookies();
+    const fetcher = (url) => fetch(url, {
+        headers: {
+            'Authorization': `Bearer ${cookies.get("token")}`
+        }
+    }).then((res) => res.json());
+
     const [user, setUser] = useState({ name: '', role: '' });
-    const [totalSantri, setTotalSantri] = useState(0);
-    const [santriAktif, setSantriAktif] = useState(0);
-    const [santriNonaktif, setSantriNonaktif] = useState(0);
-    const [santri, setSantri] = useState([]);
-    const [newSantri, setNewSantri] = useState({ nama: '', tanggal_lahir: '', jenjang_studi: '', tahun_masuk: '' });
+    const [newSantri, setNewSantri] = useState({ name: '', birthdate: '', registration_year: '', study_level: '' });
     const navigate = useNavigate();
+
+    // Use SWR to fetch data
+    const { data: santri, error } = useSWR(`${url}/api/santri`, fetcher, {
+        revalidateOnFocus: false,  // Re-fetch when window gets focus
+        dedupingInterval: 1000 * 60 * 5, // Avoid refetching for 5 minutes
+    });
+
+    // Calculate totalSantri, santriAktif, santriNonaktif based on fetched santri data
+    const totalSantri = santri ? santri.data.length : 0;
+    const santriAktif = santri ? santri.data.filter(s => s.registration_year >= '2020').length : 0;
+    const santriNonaktif = santri ? santri.data.filter(s => s.registration_year < '2020').length : 0;
 
     useEffect(() => {
         AOS.init({
-            duration: 1000, // durasi animasi dalam milidetik
-            once: true,     // animasi hanya terjadi sekali saat scroll
+            duration: 1000,  // animation duration in milliseconds
+            once: true,      // animation triggers only once on scroll
         });
     }, []);
 
     useEffect(() => {
-        const storedUser = localStorage.getItem('user');
+        const token = cookies.get('token');
+        if (!token) {
+            navigate('/login');
+            return;
+        }
+        // Decode the JWT token to get user information
+        const decodedToken = jwtDecode(token);
+        const storedUser = decodedToken.data;
+
         if (storedUser) {
-            setUser(JSON.parse(storedUser));
+            setUser(storedUser);
         } else {
             navigate('/login');
         }
-
-        // Fetch data santri dari API
-        fetch('http://localhost:4100/api/santri')
-            .then(response => response.json())
-            .then(data => {
-                setSantri(data);
-                setTotalSantri(data.length);
-                setSantriAktif(data.filter(s => s.tahun_masuk >= '2020').length);
-                setSantriNonaktif(data.filter(s => s.tahun_masuk < '2020').length);
-            })
-            .catch(error => console.error('Error fetching santri data:', error));
     }, [navigate]);
-
-    const generateNIS = () => {
-        return 'NIS' + Math.floor(1000 + Math.random() * 9000); // Generate NIS secara otomatis
-    };
-
-    const handleAddSantri = () => {
-        const generatedNIS = generateNIS();
-        const newSantriWithNIS = { ...newSantri, nis: generatedNIS };
-
-        // Tambahkan data santri baru ke state santri
-        setSantri(prevSantri => [...prevSantri, newSantriWithNIS]);
-        setTotalSantri(totalSantri + 1);
-        if (newSantri.tahun_masuk >= '2020') {
-            setSantriAktif(santriAktif + 1);
-        } else {
-            setSantriNonaktif(santriNonaktif + 1);
-        }
-        // Reset form input
-        setNewSantri({ nama: '', tanggal_lahir: '', jenjang_studi: '', tahun_masuk: '' });
-    };
 
     const handleInputChange = (e) => {
         const { name, value } = e.target;
-        setNewSantri(prevState => ({ ...prevState, [name]: value }));
+        setNewSantri({ ...newSantri, [name]: value });
     };
 
-    const handleEditSantri = (index) => {
-        const updatedSantri = prompt('Edit Nama Santri:', santri[index].nama);
-        if (updatedSantri) {
-            setSantri(prevSantri => {
-                const updatedList = [...prevSantri];
-                updatedList[index].nama = updatedSantri;
-                return updatedList;
+    const handleAddSantri = async () => {
+        try {
+            const nis = newSantri.registration_year+newSantri.study_level
+            const new_newSantri = {...newSantri, nis}
+            const response = await fetch(`${url}/api/santri`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${cookies.get("token")}`
+                },
+                body: JSON.stringify(new_newSantri)
             });
+            if (!response.ok) {
+                throw new Error('Failed to add new santri');
+            }
+            alert('Santri berhasil ditambahkan!');
+            setNewSantri({ name: '', birthdate: '', registration_year: '', study_level: '' });
+        } catch (error) {
+            alert('Gagal menambahkan santri: ' + error.message);
         }
     };
 
-    const handleDeleteSantri = (index) => {
-        if (window.confirm('Apakah Anda yakin ingin menghapus santri ini?')) {
-            setSantri(prevSantri => prevSantri.filter((_, i) => i !== index));
-            setTotalSantri(totalSantri - 1);
-        }
-    };
+    if (error) return <div>Error fetching santri data</div>;
+    if (!santri) return <div>Loading...</div>;
 
     return (
         <div className="min-h-screen bg-gray-100 flex">
@@ -132,36 +134,45 @@ const SantriPage = () => {
                         <div className="grid grid-cols-2 gap-4">
                             <input
                                 type="text"
-                                name="nama"
+                                name="name"
                                 placeholder="Nama"
-                                value={newSantri.nama}
+                                value={newSantri.name}
                                 onChange={handleInputChange}
                                 className="p-2 border rounded"
                             />
                             <input
                                 type="date"
-                                name="tanggal_lahir"
+                                name="birthdate"
                                 placeholder="Tanggal Lahir"
-                                value={newSantri.tanggal_lahir}
+                                value={newSantri.birthdate}
                                 onChange={handleInputChange}
                                 className="p-2 border rounded"
                             />
-                            <input
-                                type="text"
-                                name="jenjang_studi"
-                                placeholder="Jenjang Studi"
-                                value={newSantri.jenjang_studi}
+                            <select
+                                name="study_level"
+                                value={newSantri.study_level}
                                 onChange={handleInputChange}
                                 className="p-2 border rounded"
-                            />
-                            <input
-                                type="text"
-                                name="tahun_masuk"
-                                placeholder="Tahun Masuk"
-                                value={newSantri.tahun_masuk}
+                            >
+                                <option value="">Pilih Jenjang Studi</option>
+                                <option value="01">SD</option>
+                                <option value="02">SMP</option>
+                                <option value="03">SMA</option>
+                            </select>
+
+                            <select
+                                name="registration_year"
+                                value={newSantri.registration_year}
                                 onChange={handleInputChange}
                                 className="p-2 border rounded"
-                            />
+                            >
+                                <option value="">Pilih tahun masuk</option>
+                                <option value="22">2022</option>
+                                <option value="23">2023</option>
+                                <option value="24">2024</option>
+                                <option value="25">2025</option>
+                                <option value="26">2026</option>
+                            </select>
                         </div>
                         <button
                             onClick={handleAddSantri}
@@ -182,31 +193,16 @@ const SantriPage = () => {
                                 <th className="px-4 py-2 text-left">Tanggal Lahir</th>
                                 <th className="px-4 py-2 text-left">Jenjang Studi</th>
                                 <th className="px-4 py-2 text-left">Tahun Masuk</th>
-                                <th className="px-4 py-2 text-left">Aksi</th>
                             </tr>
                         </thead>
                         <tbody>
-                            {santri.map((s, index) => (
+                            {santri.data.map((s, index) => (
                                 <tr key={index}>
                                     <td className="border px-4 py-2">{s.nis}</td>
-                                    <td className="border px-4 py-2">{s.nama}</td>
-                                    <td className="border px-4 py-2">{s.tanggal_lahir}</td>
-                                    <td className="border px-4 py-2">{s.jenjang_studi}</td>
-                                    <td className="border px-4 py-2">{s.tahun_masuk}</td>
-                                    <td className="border px-4 py-2">
-                                        <button
-                                            onClick={() => handleEditSantri(index)}
-                                            className="bg-yellow-500 text-white px-2 py-1 rounded mr-2"
-                                        >
-                                            Edit
-                                        </button>
-                                        <button
-                                            onClick={() => handleDeleteSantri(index)}
-                                            className="bg-red-500 text-white px-2 py-1 rounded"
-                                        >
-                                            Hapus
-                                        </button>
-                                    </td>
+                                    <td className="border px-4 py-2">{s.name}</td>
+                                    <td className="border px-4 py-2">{new Date(s.birthdate).toLocaleDateString()}</td>
+                                    <td className="border px-4 py-2">{s.study_level}</td>
+                                    <td className="border px-4 py-2">{s.registration_year}</td>
                                 </tr>
                             ))}
                         </tbody>
