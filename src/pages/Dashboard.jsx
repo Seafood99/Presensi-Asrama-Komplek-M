@@ -9,8 +9,11 @@ import { MdiUser } from '../components/MdiUser';
 import LogoutButton from '../components/LogoutButton';
 import Clock from '../components/Clock';
 import Sidebar from '../components/Sidebar';
+import Cookies from 'universal-cookie';
+import { jwtDecode } from 'jwt-decode';
 
 const Dashboard = () => {
+    const cookies = new Cookies();
     const [user, setUser] = useState({ name: '', role: '', nis: '' });
     const [date, setDate] = useState(new Date());
     const [presensi, setPresensi] = useState({ hadir: 0, sakit: 0, izin: 0, absen: 0 });
@@ -32,9 +35,12 @@ const Dashboard = () => {
     const navigate = useNavigate();
 
     useEffect(() => {
-        const storedUser = localStorage.getItem('user');
+        const token = cookies.get('token');
+        if (!token) navigate('/login');
+        const user = jwtDecode(token);
+        const storedUser = user.data;
         if (storedUser) {
-            setUser(JSON.parse(storedUser));
+            setUser(storedUser);
         } else {
             navigate('/login');
         }
@@ -45,7 +51,7 @@ const Dashboard = () => {
         setDate(newDate);
 
         try {
-            const response = await fetch(`http://localhost:4100/api/santri/presensi?tanggal=${newDate}`);
+            const response = await fetch(`http:203.194.113.18:4100/api/santri/presensi?tanggal=${newDate}`);
             const data = await response.json();
 
             let total = {
@@ -75,7 +81,9 @@ const Dashboard = () => {
 
     return (
         <div className="min-h-screen bg-gray-100 flex">
-            <Sidebar user={{ name: user.name || 'User', role: user.role || 'Role not specified' }} />
+            <Sidebar 
+            // user={user}
+            user={{ name: user.name || 'User', role: user.role || 'Role not specified' }} />
             <div className="w-3/4 p-8">
                 <div className="flex justify-between items-center">
                     <h2 className="text-3xl font-bold">
