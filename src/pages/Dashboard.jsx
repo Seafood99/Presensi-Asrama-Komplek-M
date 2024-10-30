@@ -11,7 +11,7 @@ import Clock from '../components/Clock';
 import Sidebar from '../components/Sidebar';
 
 const Dashboard = () => {
-    const [user, setUser] = useState({ name: '', role: '' });
+    const [user, setUser] = useState({ name: '', role: '', nis: '' });
     const [date, setDate] = useState(new Date());
     const [presensi, setPresensi] = useState({ hadir: 0, sakit: 0, izin: 0, absen: 0 });
 
@@ -74,11 +74,13 @@ const Dashboard = () => {
     };
 
     return (
-        <div className="min-h-screen bg-gray-100 flex flex-col md:flex-row">
-            <Sidebar user={user} />
+        <div className="min-h-screen bg-gray-100 flex">
+            <Sidebar user={{ name: user.name || 'User', role: user.role || 'Role not specified' }} />
             <div className="w-3/4 p-8">
                 <div className="flex justify-between items-center">
-                    <h2 className="text-3xl font-bold">Selamat Datang {user.name}</h2>
+                    <h2 className="text-3xl font-bold">
+                        Selamat Datang {typeof user.name === 'string' ? user.name : 'User'}
+                    </h2>
                     <LogoutButton />
                 </div>
                 <div className="flex justify-end mt-4">

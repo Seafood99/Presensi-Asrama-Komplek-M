@@ -7,6 +7,9 @@ import PresensiTable from '../components/PresensiTable'; // Import komponen Pres
 import Sidebar from '../components/Sidebar';
 import DatePicker from 'react-datepicker';
 import 'react-datepicker/dist/react-datepicker.css';
+import Modal from 'react-modal';
+
+Modal.setAppElement('#root');
 
 const PresensiPage = () => {
     const [user, setUser] = useState({ name: 'Loading...', role: '' });
@@ -15,6 +18,15 @@ const PresensiPage = () => {
     const [selectedDate, setSelectedDate] = useState(new Date()); // Tanggal untuk input presensi saat ini
     const [previousPresensi, setPreviousPresensi] = useState([]); // Data presensi untuk tanggal sebelumnya
     const [previousDate, setPreviousDate] = useState(new Date()); // Tanggal untuk melihat presensi sebelumnya
+    const [showModal, setShowModal] = useState(false); // State untuk modal izin
+    const [izinData, setIzinData] = useState({
+        nama: '',
+        nis: '',
+        jenis: 'tidak mengaji ba\'da subuh',
+        keterangan: '',
+        dari: new Date(),
+        sampai: new Date()
+    });
     const navigate = useNavigate();
 
     useEffect(() => {
@@ -96,7 +108,6 @@ const PresensiPage = () => {
         });
     };
 
-    // Fungsi untuk mengambil data presensi tanggal sebelumnya
     const handleFetchPreviousPresensi = async () => {
         try {
             const formattedDate = previousDate.toISOString().split('T')[0];
@@ -115,6 +126,15 @@ const PresensiPage = () => {
         } catch (error) {
             console.error('Error fetching previous presensi data:', error);
         }
+    };
+
+    const handleIzinClick = () => {
+        setShowModal(true);
+    };
+
+    const handleIzinSubmit = () => {
+        Swal.fire('Permintaan Izin', 'Permintaan izin telah dikirim.', 'success');
+        setShowModal(false);
     };
 
     return (
@@ -159,31 +179,95 @@ const PresensiPage = () => {
                     </div>
                 )}
 
-                {/* Bagian untuk Melihat Presensi Tanggal Sebelumnya */}
-                <div className="mt-10">
-                    <h3 className="text-2xl font-semibold mb-4">Lihat Presensi Tanggal Sebelumnya</h3>
-                    <div className="flex gap-4 items-center">
-                        <DatePicker
-                            selected={previousDate}
-                            onChange={(date) => setPreviousDate(date)}
-                            className="p-2 border rounded"
-                        />
-                        <button
-                            className="bg-blue-500 text-white px-4 py-2 rounded"
-                            onClick={handleFetchPreviousPresensi}
-                        >
-                            Lihat Presensi
+
+                {user.role === 'user' && (
+                    <div className="mt-6">
+                        <button className="bg-teal-700 text-white px-4 py-2 rounded" onClick={handleIzinClick}>
+                            Ingin Izin? Klik Disini
                         </button>
                     </div>
+                )}
 
-                    {previousPresensi.length > 0 && (
-                        <div className="mt-6">
-                            <h4 className="text-xl font-semibold">Data Presensi Tanggal {previousDate.toISOString().split('T')[0]}</h4>
-                            <PresensiTable presensi={previousPresensi} user={{ role: 'viewer' }} />
-                        </div>
-                    )}
-                </div>
             </div>
+
+            {/* Modal untuk Izin */}
+            <Modal
+                isOpen={showModal}
+                onRequestClose={() => setShowModal(false)}
+                contentLabel="Form Izin"
+                className="bg-white p-8 rounded-md shadow-md w-full max-w-md m-auto"
+                overlayClassName="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center"
+            >
+                <h2 className="text-xl font-bold mb-4">Form Izin</h2>
+                <div className="mb-4">
+                    <input
+                        type="text"
+                        placeholder="Nama"
+                        value={izinData.nama}
+                        onChange={(e) => setIzinData({ ...izinData, nama: e.target.value })}
+                        className="w-full p-2 border border-gray-300 rounded-md focus:outline-none"
+                    />
+                </div>
+                <div className="mb-4">
+                    <input
+                        type="text"
+                        placeholder="NIS"
+                        value={izinData.nis}
+                        onChange={(e) => setIzinData({ ...izinData, nis: e.target.value })}
+                        className="w-full p-2 border border-gray-300 rounded-md focus:outline-none"
+                    />
+                </div>
+                <div className="mb-4">
+                    <select
+                        value={izinData.jenis}
+                        onChange={(e) => setIzinData({ ...izinData, jenis: e.target.value })}
+                        className="w-full p-2 border border-gray-300 rounded-md focus:outline-none"
+                    >
+                        <option value="tidak mengaji ba'da subuh">Tidak Mengaji Ba'da Subuh</option>
+                        <option value="tidak mengaji ba'da maghrib">Tidak Mengaji Ba'da Maghrib</option>
+                        <option value="tidak bermalam diasrama">Tidak Bermalam di Asrama</option>
+                    </select>
+                </div>
+                <div className="mb-4">
+                    <textarea
+                        placeholder="Keterangan (maksimal 200 karakter)"
+                        value={izinData.keterangan}
+                        onChange={(e) => setIzinData({ ...izinData, keterangan: e.target.value })}
+                        maxLength={200}
+                        className="w-full p-2 border border-gray-300 rounded-md focus:outline-none"
+                    />
+                </div>
+                <div className="mb-4">
+                    <label className="block mb-2">Dari Tanggal:</label>
+                    <DatePicker
+                        selected={izinData.dari}
+                        onChange={(date) => setIzinData({ ...izinData, dari: date })}
+                        className="w-full p-2 border border-gray-300 rounded-md focus:outline-none"
+                    />
+                </div>
+                <div className="mb-4">
+                    <label className="block mb-2">Sampai Tanggal:</label>
+                    <DatePicker
+                        selected={izinData.sampai}
+                        onChange={(date) => setIzinData({ ...izinData, sampai: date })}
+                        className="w-full p-2 border border-gray-300 rounded-md focus:outline-none"
+                    />
+                </div>
+                <div className="flex justify-end">
+                    <button
+                        onClick={() => setShowModal(false)}
+                        className="mr-4 px-4 py-2 text-gray-600 hover:text-gray-800"
+                    >
+                        Batal
+                    </button>
+                    <button
+                        onClick={handleIzinSubmit}
+                        className="px-4 py-2 bg-teal-900 text-white rounded-md hover:bg-teal-800"
+                    >
+                        Submit
+                    </button>
+                </div>
+            </Modal>
         </div>
     );
 };

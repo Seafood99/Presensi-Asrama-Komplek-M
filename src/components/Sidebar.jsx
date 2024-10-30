@@ -50,8 +50,13 @@ const Sidebar = ({ user }) => {
             </div>
             <div className="text-center mb-6">
                 <div className="w-24 h-24 bg-gray-300 rounded-full mx-auto"></div>
-                <h2 className="text-lg text-white mt-4 font-semibold">{user.name}</h2>
-                <span className="text-sm text-white">{user.role}</span>
+                <h2 className="text-lg text-white mt-4 font-semibold">
+                    {typeof user.name === 'string' ? user.name : 'User'}
+                </h2>
+                <span className="text-sm text-white">
+                    {typeof user.role === 'string' ? user.role : 'Role Tidak Diketahui'}
+                </span>
+
                 <div className="mt-4">
                     <button
                         onClick={handleEditProfile}

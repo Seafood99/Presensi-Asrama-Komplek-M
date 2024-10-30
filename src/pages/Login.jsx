@@ -1,53 +1,70 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import Modal from 'react-modal';
+
+Modal.setAppElement('#root');
 
 const Login = () => {
     const [nis, setNis] = useState('');
     const [password, setPassword] = useState('');
+    const [showPassword, setShowPassword] = useState(false);
     const [error, setError] = useState('');
+    const [showModal, setShowModal] = useState(false);
+    const [forgotNis, setForgotNis] = useState('');
     const navigate = useNavigate();
-
 
     const handleLogin = async (e) => {
         e.preventDefault();
 
-        const response = await fetch('https://presensi-asrama-komplek-m-production.up.railway.app/api/santri', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({ nis, password })
-        });
+        try {
+            const response = await fetch('http://localhost:4100/login', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ nis, password })
+            });
 
-        const data = await response.json();
+            if (!response.ok) {
+                const errorData = await response.json();
+                throw new Error(errorData.message || 'Login gagal. Silakan periksa NIS dan password.');
+            }
 
-        // if (response.ok) {
-        //     // Simpan nama dan role pengguna ke localStorage
-        //     localStorage.setItem('user', JSON.stringify({ name: data.user, role: data.role }));
+            const data = await response.json();
+            console.log('Response dari server:', data);
 
-        //     // Arahkan ke dashboard setelah login berhasil
-        //     navigate('/dashboard');
-        // } else {
-        //     setError(data.message);
-        // }
+            // Pastikan struktur data yang diterima sesuai
+            if (data && data.user && data.user.nama && data.user.role) {
+                // Simpan nama, role, dan nis pengguna ke localStorage
+                localStorage.setItem('user', JSON.stringify({ name: data.user.nama, role: data.user.role, nis: nis }));
 
-        if (response.ok) {
-            // Simpan nama, role, dan nis pengguna ke localStorage
-            localStorage.setItem('user', JSON.stringify({ name: data.user, role: data.role, nis: nis }));
-
-            // Arahkan ke dashboard setelah login berhasil
-            navigate('/dashboard');
-        } else {
-            setError(data.message);
+                // Arahkan ke dashboard setelah login berhasil
+                navigate('/dashboard');
+            } else {
+                throw new Error('Login gagal. Data pengguna tidak lengkap.');
+            }
+        } catch (error) {
+            console.error('Error saat login:', error);
+            setError(error.message);
         }
-
     };
+
+    const handleForgotPassword = () => {
+        setShowModal(true);
+    };
+
+    const handleForgotSubmit = () => {
+        // Logika untuk reset password dapat ditambahkan di sini, misalnya mengirim email atau memberikan instruksi lebih lanjut
+        alert(`Instruksi reset password telah dikirim ke NIS: ${forgotNis}`);
+        setShowModal(false);
+    };
+
     return (
         <div className="min-h-screen flex items-center justify-center bg-teal-900">
             <div className="bg-white p-10 rounded-md shadow-md w-full max-w-sm">
                 {/* Logo Pesantren */}
                 <div className="flex justify-center mb-6">
-                    <img src="src\assets\logo.png" alt="Logo pesantren" className="w-32 h-auto" />
+                    <img src="src/assets/logo.png" alt="Logo pesantren" className="w-32 h-auto" />
                 </div>
 
                 {/* Form login */}
@@ -71,16 +88,29 @@ const Login = () => {
                             <i className="fas fa-key"></i>
                         </span>
                         <input
-                            type="password"
+                            type={showPassword ? 'text' : 'password'}
                             placeholder="Password"
                             value={password}
                             onChange={(e) => setPassword(e.target.value)}
                             className="appearance-none bg-transparent border-none w-full text-gray-700 py-1 px-2 leading-tight focus:outline-none"
                             required
                         />
+                        <span className="ml-2 text-gray-500 cursor-pointer" onClick={() => setShowPassword(!showPassword)}>
+                            <i className={showPassword ? 'fas fa-eye-slash' : 'fas fa-eye'}></i>
+                        </span>
                     </div>
 
-                    {error && <p className="text-red-500">{error}</p>}
+                    {error && <p className="text-red-500 mt-4 text-center">{error}</p>}
+
+                    <div className="flex justify-end mb-4">
+                        <button
+                            type="button"
+                            onClick={handleForgotPassword}
+                            className="text-teal-900 hover:underline"
+                        >
+                            Lupa Password?
+                        </button>
+                    </div>
 
                     <div className="flex justify-end">
                         <button
@@ -94,9 +124,42 @@ const Login = () => {
                             ></span>
                         </button>
                     </div>
-
                 </form>
             </div>
+
+            {/* Modal Forgot Password */}
+            <Modal
+                isOpen={showModal}
+                onRequestClose={() => setShowModal(false)}
+                contentLabel="Lupa Password"
+                className="bg-white p-8 rounded-md shadow-md w-full max-w-sm m-auto"
+                overlayClassName="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center"
+            >
+                <h2 className="text-xl font-bold mb-4">Lupa Password</h2>
+                <div className="mb-4">
+                    <input
+                        type="text"
+                        placeholder="Masukkan NIS Anda"
+                        value={forgotNis}
+                        onChange={(e) => setForgotNis(e.target.value)}
+                        className="w-full p-2 border border-gray-300 rounded-md focus:outline-none"
+                    />
+                </div>
+                <div className="flex justify-end">
+                    <button
+                        onClick={() => setShowModal(false)}
+                        className="mr-4 px-4 py-2 text-gray-600 hover:text-gray-800"
+                    >
+                        Batal
+                    </button>
+                    <button
+                        onClick={handleForgotSubmit}
+                        className="px-4 py-2 bg-teal-900 text-white rounded-md hover:bg-teal-800"
+                    >
+                        Submit
+                    </button>
+                </div>
+            </Modal>
         </div>
     );
 };
