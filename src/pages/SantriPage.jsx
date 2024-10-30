@@ -8,8 +8,9 @@ import Sidebar from '../components/Sidebar';
 import AOS from 'aos';
 import 'aos/dist/aos.css';
 import Cookies from 'universal-cookie';
-import {jwtDecode} from "jwt-decode";
+import { jwtDecode } from "jwt-decode";
 import useSWR from 'swr';
+import Modal from 'react-modal';
 
 const SantriPage = () => {
     const url = "http://203.194.113.18:4100";
@@ -22,6 +23,8 @@ const SantriPage = () => {
 
     const [user, setUser] = useState({ name: '', role: '' });
     const [newSantri, setNewSantri] = useState({ name: '', birthdate: '', registration_year: '', study_level: '' });
+    const [modalIsOpen, setModalIsOpen] = useState(false);
+    const [editSantri, setEditSantri] = useState({});
     const navigate = useNavigate();
 
     // Use SWR to fetch data
@@ -66,8 +69,8 @@ const SantriPage = () => {
 
     const handleAddSantri = async () => {
         try {
-            const nis = newSantri.registration_year+newSantri.study_level
-            const new_newSantri = {...newSantri, nis}
+            const nis = newSantri.registration_year + newSantri.study_level;
+            const new_newSantri = { ...newSantri, nis };
             const response = await fetch(`${url}/api/santri`, {
                 method: 'POST',
                 headers: {
@@ -84,6 +87,61 @@ const SantriPage = () => {
         } catch (error) {
             alert('Gagal menambahkan santri: ' + error.message);
         }
+    };
+
+    const openModal = (santri) => {
+        setEditSantri(santri);
+        setModalIsOpen(true);
+    };
+
+    const closeModal = () => {
+        setModalIsOpen(false);
+    };
+
+    const handleEditInputChange = (e) => {
+        const { name, value } = e.target;
+        setEditSantri({ ...editSantri, [name]: value });
+    };
+
+    const handleSaveChanges = async () => {
+        try {
+            const response = await fetch(`${url}/api/santri/${editSantri.nis}`, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${cookies.get("token")}`
+                },
+                body: JSON.stringify(editSantri)
+            });
+            if (!response.ok) {
+                throw new Error('Failed to update santri');
+            }
+            alert('Santri berhasil diperbarui!');
+            closeModal();
+        } catch (error) {
+            alert('Gagal memperbarui santri: ' + error.message);
+        }
+    };
+
+    const handleDeleteSantri = async () => {
+        try {
+            const response = await fetch(`${url}/api/santri`, {
+                method: 'DELETE',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${cookies.get("token")}`
+                },
+                body: JSON.stringify({ nis: editSantri.nis })
+            });
+            if (!response.ok) {
+                throw new Error('Failed to delete santri');
+            }
+            alert('Santri berhasil dihapus!');
+            closeModal();
+        } catch (error) {
+            alert('Gagal menghapus santri: ' + error.message);
+        }
+        console.log('Deleting santri:', editSantri.nis);
     };
 
     if (error) return <div>Error fetching santri data</div>;
@@ -193,6 +251,7 @@ const SantriPage = () => {
                                 <th className="px-4 py-2 text-left">Tanggal Lahir</th>
                                 <th className="px-4 py-2 text-left">Jenjang Studi</th>
                                 <th className="px-4 py-2 text-left">Tahun Masuk</th>
+                                <th className="px-4 py-2 text-left">Aksi</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -203,11 +262,95 @@ const SantriPage = () => {
                                     <td className="border px-4 py-2">{new Date(s.birthdate).toLocaleDateString()}</td>
                                     <td className="border px-4 py-2">{s.study_level}</td>
                                     <td className="border px-4 py-2">{s.registration_year}</td>
+                                    <td className="border px-4 py-2">
+                                        <button
+                                            onClick={() => openModal(s)}
+                                            className="bg-yellow-500 text-white px-4 py-2 rounded"
+                                        >
+                                            Edit
+                                        </button>
+                                    </td>
                                 </tr>
                             ))}
                         </tbody>
                     </table>
                 </div>
+
+                {/* Modal for Editing Santri */}
+                <Modal
+                    isOpen={modalIsOpen}
+                    onRequestClose={closeModal}
+                    contentLabel="Edit Santri"
+                    overlayClassName="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center"
+                    style={{
+                        content: {
+                            top: '50%',
+                            left: '50%',
+                            right: 'auto',
+                            bottom: 'auto',
+                            marginRight: '-50%',
+                            transform: 'translate(-50%, -50%)',
+                            width: '400px',
+                            padding: '20px'
+                        },
+                        overlay: {
+                            zIndex: 1000
+                        },
+
+                    }}
+                >
+                    <h2 className="text-xl font-bold mb-4">Edit Santri</h2>
+                    <div className="grid grid-cols-1 gap-4">
+                        <input
+                            type="text"
+                            name="name"
+                            placeholder="Nama"
+                            value={editSantri.name}
+                            onChange={handleEditInputChange}
+                            className="p-2 border rounded"
+                        />
+                        <input
+                            type="date"
+                            name="birthdate"
+                            placeholder="Tanggal Lahir"
+                            value={editSantri.birthdate}
+                            onChange={handleEditInputChange}
+                            className="p-2 border rounded"
+                        />
+                        <select
+                            name="study_level"
+                            value={editSantri.study_level}
+                            onChange={handleEditInputChange}
+                            className="p-2 border rounded"
+                        >
+                            <option value="">Pilih Jenjang Studi</option>
+                            <option value="01">SD</option>
+                            <option value="02">SMP</option>
+                            <option value="03">SMA</option>
+                        </select>
+
+                        <select
+                            name="registration_year"
+                            value={editSantri.registration_year}
+                            onChange={handleEditInputChange}
+                            className="p-2 border rounded"
+                        >
+                            <option value="">Pilih tahun masuk</option>
+                            <option value="22">2022</option>
+                            <option value="23">2023</option>
+                            <option value="24">2024</option>
+                            <option value="25">2025</option>
+                            <option value="26">2026</option>
+                        </select>
+                    </div>
+                    <div className="mt-4 flex justify-between">
+                        <button onClick={handleDeleteSantri} className="bg-red-500 text-white px-4 py-2 rounded">Hapus</button>
+                        <div className="flex">
+                            <button onClick={closeModal} className="bg-gray-500 text-white px-4 py-2 rounded mr-2">Batal</button>
+                            <button onClick={handleSaveChanges} className="bg-blue-500 text-white px-4 py-2 rounded">Simpan</button>
+                        </div>
+                    </div>
+                </Modal>
             </div>
         </div>
     );
