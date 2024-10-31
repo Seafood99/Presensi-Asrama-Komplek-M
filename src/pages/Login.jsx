@@ -65,7 +65,7 @@ const Login = () => {
             <div className="bg-white p-10 rounded-md shadow-md w-full max-w-sm">
                 {/* Logo Pesantren */}
                 <div className="flex justify-center mb-6">
-                    <img src="public\assets\logo.png" alt="Logo pesantren" className="w-32 h-auto" />
+                    <img src="public\logo.png" alt="Logo pesantren" className="w-32 h-auto" />
                 </div>
 
                 {/* Form login */}
