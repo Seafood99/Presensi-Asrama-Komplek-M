@@ -3,7 +3,7 @@ import { NavLink } from 'react-router-dom';
 import Modal from 'react-modal';
 import Swal from 'sweetalert2';
 
-const Sidebar = ({ user }) => {
+const Sidebar = ({ user, opened }) => {
     const [isEditProfileOpen, setIsEditProfileOpen] = useState(false);
     const [newProfile, setNewProfile] = useState({ oldPassword: '', newPassword: '', profilePicture: null });
 
@@ -35,7 +35,6 @@ const Sidebar = ({ user }) => {
         }).then((result) => {
             if (result.isConfirmed) {
                 console.log('New Profile Data:', newProfile);
-                // Lakukan panggilan API untuk menyimpan perubahan profil di backend
                 Swal.fire('Tersimpan!', 'Profil telah berhasil disimpan.', 'success');
                 handleCloseModal();
             }
@@ -43,7 +42,17 @@ const Sidebar = ({ user }) => {
     };
 
     return (
-        <div className="w-1/4 bg-teal-800 p-4">
+        <div className={`
+            fixed
+            w-64 md:w-1/4
+            h-screen
+            bg-teal-800
+            p-4
+            transition-transform duration-300 ease-in-out
+            transform
+            ${opened ? 'translate-x-0' : '-translate-x-full md:translate-x-0'}
+            z-30
+        `}>
             <div className="text-center mb-6">
                 <h1 className="text-2xl font-bold text-white">Komplek M Al-Busyro</h1>
             </div>
@@ -57,15 +66,14 @@ const Sidebar = ({ user }) => {
                         {typeof user.role === 'string' ? user.role : 'Role Tidak Diketahui'}
                     </span>
                     <span className='text-sm text-white'>
-                        {typeof user.nis ===  'string' ? user.nis : 'NIS Tidak Diketahui'}
-
+                        {typeof user.nis === 'number' ? user.nis : 'NIS Tidak Diketahui'}
                     </span>
                 </section>
 
                 <div className="mt-4">
                     <button
                         onClick={handleEditProfile}
-                        className="bg-yellow-500 text-white px-4 py-1 rounded mr-2"
+                        className="bg-yellow-500 text-white px-4 py-1 rounded mr-2 hover:bg-yellow-600 transition-colors"
                     >
                         Edit Profil
                     </button>
@@ -122,7 +130,6 @@ const Sidebar = ({ user }) => {
                 </ul>
             </nav>
 
-            {/* Modal untuk Edit Profil */}
             <Modal
                 isOpen={isEditProfileOpen}
                 onRequestClose={handleCloseModal}

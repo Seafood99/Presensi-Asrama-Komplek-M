@@ -17,6 +17,7 @@ const Dashboard = () => {
     const [user, setUser] = useState({ name: '', role: '', nis: '' });
     const [date, setDate] = useState(new Date());
     const [presensi, setPresensi] = useState({ hadir: 0, sakit: 0, izin: 0, absen: 0 });
+    const [isOpen, setIsOpen] = useState(false);
 
     const colorMap = {
         hadir: 'green',
@@ -81,15 +82,42 @@ const Dashboard = () => {
 
     return (
         <div className="min-h-screen bg-gray-100 flex">
-            <Sidebar 
-            // user={user}
-            user={{ name: user.name || 'User', role: user.role || 'Role not specified' }} />
-            <div className="w-3/4 p-8">
+            {isOpen &&
+                <button className="md:hidden absolute top-4 right-4" onClick={()=>setIsOpen(isOpen => !isOpen)}>
+                    <svg class="w-6 h-6 text-gray-800" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24">
+                        <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18 17.94 6M18 18 6.06 6"/>
+                    </svg>
+                </button>
+            }
+            <Sidebar user={user} opened={isOpen} />
+            <div className={`md:w-3/4 w-full p-8 md:ms-[28rem]`}>
                 <div className="flex justify-between items-center">
-                    <h2 className="text-3xl font-bold">
-                        Selamat Datang {typeof user.name === 'string' ? user.name : 'User'}
-                    </h2>
-                    <LogoutButton />
+                    <div className="flex justify-between items-center">
+                        <section className="flex gap-x-3">
+                            <button onClick={()=>setIsOpen(isOpen => !isOpen)} className='md:hidden block'>
+                                <svg
+                                    class="w-6 h-6 text-gray-800"
+                                    aria-hidden="true"
+                                    xmlns="http://www.w3.org/2000/svg"
+                                    width="24"
+                                    height="24"
+                                    fill="none"
+                                    viewBox="0 0 24 24"
+                                >
+                                    <path
+                                    stroke="currentColor"
+                                    stroke-linecap="round"
+                                    stroke-width="2"
+                                    d="M5 7h14M5 12h14M5 17h14"
+                                    />
+                                </svg>
+                            </button>
+                            <h2 className="md:text-3xl text-xl font-bold">
+                                Selamat Datang {typeof user.name === 'string' ? user.name : 'User'}
+                            </h2>
+                        </section>
+                        <LogoutButton />
+                    </div>
                 </div>
                 <div className="flex justify-end mt-4">
                     <Clock />

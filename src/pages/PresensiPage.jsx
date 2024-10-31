@@ -24,6 +24,7 @@ const PresensiPage = () => {
     const [previousPresensi, setPreviousPresensi] = useState([]); // Data presensi untuk tanggal sebelumnya
     const [previousDate, setPreviousDate] = useState(new Date()); // Tanggal untuk melihat presensi sebelumnya
     const [showModal, setShowModal] = useState(false); // State untuk modal izin
+    const [isOpen, setIsOpen] = useState(false);
     const [izinData, setIzinData] = useState({
         nama: '',
         nis: '',
@@ -153,12 +154,41 @@ const PresensiPage = () => {
 
     return (
         <div className="min-h-screen bg-gray-100 flex">
-            <Sidebar user={user} />
+            {isOpen &&
+                <button className="md:hidden absolute top-4 right-4" onClick={()=>setIsOpen(isOpen => !isOpen)}>
+                    <svg class="w-6 h-6 text-gray-800" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24">
+                        <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18 17.94 6M18 18 6.06 6"/>
+                    </svg>
+                </button>
+            }
+            <Sidebar user={user} opened={isOpen} />
 
-            <div className="w-3/4 p-8">
+            <div className="md:w-3/4 w-full p-8 md:ms-[28rem]">
                 <div className="flex justify-between items-center">
-                    <h2 className="text-3xl font-bold">Presensi Ngaji {selectedSession === 'subuh' ? "Ba'da Subuh" : "Ba'da Maghrib"}</h2>
-                    <LogoutButton />
+                    <div className="flex justify-between items-center">
+                        <section className="flex gap-x-3">
+                            <button onClick={()=>setIsOpen(isOpen => !isOpen)} className='md:hidden block'>
+                            <svg
+                                class="w-6 h-6 text-gray-800"
+                                aria-hidden="true"
+                                xmlns="http://www.w3.org/2000/svg"
+                                width="24"
+                                height="24"
+                                fill="none"
+                                viewBox="0 0 24 24"
+                            >
+                                <path
+                                stroke="currentColor"
+                                stroke-linecap="round"
+                                stroke-width="2"
+                                d="M5 7h14M5 12h14M5 17h14"
+                                />
+                            </svg>
+                            </button>
+                            <h2 className="md:text-3xl text-xl font-bold">Presensi Ngaji {selectedSession === 'subuh' ? "Ba'da Subuh" : "Ba'da Maghrib"}</h2>
+                        </section>
+                        <LogoutButton />
+                    </div>
                 </div>
 
                 <div className="flex justify-end mt-4">
