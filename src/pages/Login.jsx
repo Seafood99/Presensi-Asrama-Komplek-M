@@ -19,7 +19,7 @@ const Login = () => {
         e.preventDefault();
 
         try {
-            const response = await fetch('http://203.194.113.18:4100/api/santri', {
+            const response = await fetch('http://203.194.113.18:4100/login', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
