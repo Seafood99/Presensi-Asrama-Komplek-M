@@ -36,7 +36,7 @@ const Login = () => {
             console.log('Response dari server:', data);
 
             // Pastikan struktur data yang diterima sesuai
-            if (data && data.user && data.user.nama && data.user.role) {
+            if (data.token) {
                 // Simpan nama, role, dan nis pengguna ke localStorage
                 cookies.set('token', data.token, { path: '/' });
                 // Arahkan ke dashboard setelah login berhasil
