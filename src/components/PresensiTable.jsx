@@ -43,7 +43,7 @@ const PresensiTable = ({ presensi, user, handleStatusChange }) => {
             })
             console.log(user)
             // // Mengirim data ke server
-            const response = await fetch('http://203.194.113.18:4100/api/presensi', {
+            const response = await fetch('https://strong-aphid-joint.ngrok-free.app/api/presensi', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',

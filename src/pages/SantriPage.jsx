@@ -13,7 +13,7 @@ import useSWR from 'swr';
 import Modal from 'react-modal';
 
 const SantriPage = () => {
-    const url = "http://203.194.113.18:4100";
+    const url = "https://strong-aphid-joint.ngrok-free.app";
     const cookies = new Cookies();
     const fetcher = (url) => fetch(url, {
         headers: {

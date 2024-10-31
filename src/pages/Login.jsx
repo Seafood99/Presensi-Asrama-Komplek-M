@@ -19,7 +19,7 @@ const Login = () => {
         e.preventDefault();
 
         try {
-            const response = await fetch('http://203.194.113.18:4100/login', {
+            const response = await fetch('https://strong-aphid-joint.ngrok-free.app/login', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'

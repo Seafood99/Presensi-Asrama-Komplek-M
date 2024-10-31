@@ -44,7 +44,7 @@ const PresensiPage = () => {
             navigate('/login');
         }
         // Fetch data santri dari API
-        fetch('http://203.194.113.18:4100/api/santri', {headers
+        fetch('https://strong-aphid-joint.ngrok-free.app/api/santri', {headers
             : {
                 'Content-Type': 'application/json',
                 'Authorization': `Bearer ${cookies.get("token")}`
@@ -94,7 +94,7 @@ const PresensiPage = () => {
 
                 console.log('Request Body:', requestBody);  // Debugging untuk melihat body request
 
-                fetch('http://203.194.113.18:4100/api/presensi', {
+                fetch('https://strong-aphid-joint.ngrok-free.app/api/presensi', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
@@ -120,7 +120,7 @@ const PresensiPage = () => {
     const handleFetchPreviousPresensi = async () => {
         try {
             const formattedDate = previousDate.toISOString().split('T')[0];
-            const response = await fetch(`http://203.194.113.18:4100/api/presensi`,{
+            const response = await fetch(`https://strong-aphid-joint.ngrok-free.app/api/presensi`,{
                 headers : {
                     'Content-Type': 'application/json',
                     'Authorization': `Bearer ${cookies.get("token")}`

@@ -51,7 +51,7 @@ const Dashboard = () => {
         setDate(newDate);
 
         try {
-            const response = await fetch(`http:203.194.113.18:4100/api/santri/presensi?tanggal=${newDate}`);
+            const response = await fetch(`https://strong-aphid-joint.ngrok-free.app/api/santri/presensi?tanggal=${newDate}`);
             const data = await response.json();
 
             let total = {
