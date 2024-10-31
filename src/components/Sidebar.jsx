@@ -80,7 +80,7 @@ const Sidebar = ({ user }) => {
                                 `flex items-center p-2 rounded ${isActive ? 'bg-teal-700' : 'hover:bg-teal-600'} text-white`
                             }
                         >
-                            <img src="public\home.svg" alt="Logo Home" className="w-6 h-6 mr-2" style={{ filter: 'invert(1)' }} />
+                            <img src="/home.svg" alt="Logo Home" className="w-6 h-6 mr-2" style={{ filter: 'invert(1)' }} />
                             <span>Dashboard</span>
                         </NavLink>
                     </li>
@@ -91,7 +91,7 @@ const Sidebar = ({ user }) => {
                                 `flex items-center p-2 rounded ${isActive ? 'bg-teal-700' : 'hover:bg-teal-600'} text-white`
                             }
                         >
-                            <img src="public\book-bookmark-fill.svg" alt="Logo Panduan" className="w-6 h-6 mr-2" style={{ filter: 'invert(1)' }} />
+                            <img src="/book-bookmark-fill.svg" alt="Logo Panduan" className="w-6 h-6 mr-2" style={{ filter: 'invert(1)' }} />
                             <span>Panduan Website</span>
                         </NavLink>
                     </li>
@@ -102,7 +102,7 @@ const Sidebar = ({ user }) => {
                                 `flex items-center p-2 rounded ${isActive ? 'bg-teal-700' : 'hover:bg-teal-600'} text-white`
                             }
                         >
-                            <img src="public\checklist.svg" alt="Logo Presensi" className="w-6 h-6 mr-2" style={{ filter: 'invert(1)' }} />
+                            <img src="/checklist.svg" alt="Logo Presensi" className="w-6 h-6 mr-2" style={{ filter: 'invert(1)' }} />
                             <span>Presensi</span>
                         </NavLink>
                     </li>
@@ -114,7 +114,7 @@ const Sidebar = ({ user }) => {
                                     `flex items-center p-2 rounded ${isActive ? 'bg-teal-700' : 'hover:bg-teal-600'} text-white`
                                 }
                             >
-                                <img src="public\user.svg" alt="Logo Santri" className="w-6 h-6 mr-2" style={{ filter: 'invert(1)' }} />
+                                <img src="/user.svg" alt="Logo Santri" className="w-6 h-6 mr-2" style={{ filter: 'invert(1)' }} />
                                 <span>Santri</span>
                             </NavLink>
                         </li>
