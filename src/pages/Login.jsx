@@ -2,10 +2,12 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Modal from 'react-modal';
 import Cookies from 'universal-cookie';
+import { useApiUrl } from '../helpers/apiUrl';
 
 Modal.setAppElement('#root');
 
 const Login = () => {
+    const url = useApiUrl();
     const cookies = new Cookies();
     const [nis, setNis] = useState('');
     const [password, setPassword] = useState('');
@@ -19,7 +21,7 @@ const Login = () => {
         e.preventDefault();
 
         try {
-            const response = await fetch('https://strong-aphid-joint.ngrok-free.app/login', {
+            const response = await fetch(`${url}/login`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'

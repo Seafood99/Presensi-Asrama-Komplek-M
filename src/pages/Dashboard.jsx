@@ -11,8 +11,11 @@ import Clock from '../components/Clock';
 import Sidebar from '../components/Sidebar';
 import Cookies from 'universal-cookie';
 import { jwtDecode } from 'jwt-decode';
+import { useApiUrl } from '../helpers/apiUrl';
+import { checkToken } from '../helpers/tokenCheck';
 
 const Dashboard = () => {
+    const url = useApiUrl();
     const cookies = new Cookies();
     const [user, setUser] = useState({ name: '', role: '', nis: '' });
     const [date, setDate] = useState(new Date());
@@ -45,14 +48,14 @@ const Dashboard = () => {
         } else {
             navigate('/login');
         }
-    }, [navigate]);
+    }, [navigate, checkToken]);
 
     // Mengambil data presensi dari API berdasarkan tanggal
     const handleDateChange = async (newDate) => {
         setDate(newDate);
 
         try {
-            const response = await fetch(`https://strong-aphid-joint.ngrok-free.app/api/santri/presensi?tanggal=${newDate}`);
+            const response = await fetch(`${url}/api/santri/presensi?tanggal=${newDate}`);
             const data = await response.json();
 
             let total = {
@@ -84,40 +87,41 @@ const Dashboard = () => {
         <div className="min-h-screen bg-gray-100 flex">
             {isOpen &&
                 <button className="md:hidden absolute top-4 right-4" onClick={()=>setIsOpen(isOpen => !isOpen)}>
-                    <svg class="w-6 h-6 text-gray-800" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24">
-                        <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18 17.94 6M18 18 6.06 6"/>
+                    <svg className="w-6 h-6 text-gray-800" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24">
+                        <path stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18 17.94 6M18 18 6.06 6"/>
                     </svg>
                 </button>
             }
             <Sidebar user={user} opened={isOpen} />
             <div className={`md:w-3/4 w-full p-8 md:ms-[28rem]`}>
                 <div className="flex justify-between items-center">
-                    <div className="flex justify-between items-center">
-                        <section className="flex gap-x-3">
-                            <button onClick={()=>setIsOpen(isOpen => !isOpen)} className='md:hidden block'>
-                                <svg
-                                    class="w-6 h-6 text-gray-800"
-                                    aria-hidden="true"
-                                    xmlns="http://www.w3.org/2000/svg"
-                                    width="24"
-                                    height="24"
-                                    fill="none"
-                                    viewBox="0 0 24 24"
-                                >
-                                    <path
-                                    stroke="currentColor"
-                                    stroke-linecap="round"
-                                    stroke-width="2"
-                                    d="M5 7h14M5 12h14M5 17h14"
-                                    />
-                                </svg>
-                            </button>
-                            <h2 className="md:text-3xl text-xl font-bold">
-                                Selamat Datang {typeof user.name === 'string' ? user.name : 'User'}
-                            </h2>
-                        </section>
-                        <LogoutButton />
-                    </div>
+                    <section className="flex gap-x-3 md:hidden">
+                        <button onClick={()=>setIsOpen(isOpen => !isOpen)}>
+                            <svg
+                                className="w-6 h-6 text-gray-800"
+                                aria-hidden="true"
+                                xmlns="http://www.w3.org/2000/svg"
+                                width="24"
+                                height="24"
+                                fill="none"
+                                viewBox="0 0 24 24"
+                            >
+                                <path
+                                stroke="currentColor"
+                                strokeLinecap="round"
+                                strokeWidth="2"
+                                d="M5 7h14M5 12h14M5 17h14"
+                                />
+                            </svg>
+                        </button>
+                        <h2 className="md:text-3xl text-xl font-bold">
+                            Selamat Datang {typeof user.name === 'string' ? user.name : 'User'}
+                        </h2>
+                    </section>
+                    <h2 className="md:text-3xl text-xl font-bold md:block hidden">
+                        Selamat Datang {typeof user.name === 'string' ? user.name : 'User'}
+                    </h2>
+                    <LogoutButton />
                 </div>
                 <div className="flex justify-end mt-4">
                     <Clock />

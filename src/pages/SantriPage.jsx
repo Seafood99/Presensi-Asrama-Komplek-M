@@ -11,16 +11,24 @@ import Cookies from "universal-cookie";
 import { jwtDecode } from "jwt-decode";
 import useSWR from "swr";
 import Modal from "react-modal";
+import { useApiUrl } from "../helpers/apiUrl";
+import Swal from "sweetalert2";
 
 const SantriPage = () => {
-  const url = "https://strong-aphid-joint.ngrok-free.app";
+  const url = useApiUrl();
   const cookies = new Cookies();
   const fetcher = (url) =>
     fetch(url, {
       headers: {
         Authorization: `Bearer ${cookies.get("token")}`,
       },
-    }).then((res) => res.json());
+    }).then(async(res) => {
+      if (res.status === 401) {
+        cookies.remove("token");
+        navigate("/login");
+      }
+      return res.json();
+    });
 
   const [user, setUser] = useState({ name: "", role: "" });
   const [newSantri, setNewSantri] = useState({
@@ -43,10 +51,10 @@ const SantriPage = () => {
   // Calculate totalSantri, santriAktif, santriNonaktif based on fetched santri data
   const totalSantri = santri ? santri.data.length : 0;
   const santriAktif = santri
-    ? santri.data.filter((s) => s.registration_year >= "2020").length
+    ? santri.data.filter((s) => s.is_active).length
     : 0;
   const santriNonaktif = santri
-    ? santri.data.filter((s) => s.registration_year < "2020").length
+    ? santri.data.filter((s) => !s.is_active).length
     : 0;
 
   useEffect(() => {
@@ -82,6 +90,18 @@ const SantriPage = () => {
     try {
       const nis = newSantri.registration_year + newSantri.study_level;
       const new_newSantri = { ...newSantri, nis };
+
+      if(new_newSantri.name === "" || new_newSantri.birthdate === "" || new_newSantri.study_level === "" || new_newSantri.registration_year === "") {
+        Swal.fire({
+          title: 'Error',
+          text: 'Silahkan isi semua field!',
+          icon: 'error',
+          confirmButtonColor: '#3085d6',
+          confirmButtonText: 'Ok'
+        })
+        return
+      }
+
       const response = await fetch(`${url}/api/santri`, {
         method: "POST",
         headers: {
@@ -93,7 +113,16 @@ const SantriPage = () => {
       if (!response.ok) {
         throw new Error("Failed to add new santri");
       }
-      alert("Santri berhasil ditambahkan!");
+      // Show the sweet alert 
+
+      Swal.fire({
+        title: 'Berhasil',
+        text: "Santri berhasil ditambahkan",
+        icon: 'success',
+        confirmButtonColor: '#3085d6',
+        confirmButtonText: 'Kembali',
+      })
+
       setNewSantri({
         name: "",
         birthdate: "",
@@ -160,15 +189,27 @@ const SantriPage = () => {
     console.log("Deleting santri:", editSantri.nis);
   };
 
-  if (error) return <div>Error fetching santri data</div>;
-  if (!santri) return <div>Loading...</div>;
+  if (error) return (
+    <div className="min-h-screen flex justify-center items-center animate-pulse bg-gray-300">
+      Error fetching santri data
+    </div>
+  );
+  if (!santri) return (
+    <div className="min-h-screen flex justify-center items-center animate-pulse bg-gray-300">
+      {/* Loading icon */}
+      <svg className="h-12 w-12 animate-spin" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+      </svg>
+    </div>
+  );
 
   return (
     <div className="min-h-screen bg-gray-100 flex">
         {isOpen &&
             <button className="md:hidden absolute top-4 right-4" onClick={()=>setIsOpen(isOpen => !isOpen)}>
-                <svg class="w-6 h-6 text-gray-800" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24">
-                    <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18 17.94 6M18 18 6.06 6"/>
+                <svg className="w-6 h-6 text-gray-800" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24">
+                    <path stroke="currentColor" strokeLinecap="round" stroke-linejoin="round" strokeWidth="2" d="M6 18 17.94 6M18 18 6.06 6"/>
                 </svg>
             </button>
         }
@@ -180,7 +221,7 @@ const SantriPage = () => {
           <section className="flex gap-x-3">
             <button onClick={()=>setIsOpen(isOpen => !isOpen)} className='md:hidden block'>
               <svg
-                class="w-6 h-6 text-gray-800"
+                className="w-6 h-6 text-gray-800"
                 aria-hidden="true"
                 xmlns="http://www.w3.org/2000/svg"
                 width="24"
@@ -190,8 +231,8 @@ const SantriPage = () => {
               >
                 <path
                   stroke="currentColor"
-                  stroke-linecap="round"
-                  stroke-width="2"
+                  strokeLinecap="round"
+                  strokeWidth="2"
                   d="M5 7h14M5 12h14M5 17h14"
                 />
               </svg>
@@ -249,6 +290,7 @@ const SantriPage = () => {
                 value={newSantri.name}
                 onChange={handleInputChange}
                 className="p-2 border rounded"
+                required
               />
               <input
                 type="date"
@@ -257,12 +299,14 @@ const SantriPage = () => {
                 value={newSantri.birthdate}
                 onChange={handleInputChange}
                 className="p-2 border rounded"
+                required
               />
               <select
                 name="study_level"
                 value={newSantri.study_level}
                 onChange={handleInputChange}
                 className="p-2 border rounded"
+                required
               >
                 <option value="">Pilih Jenjang Studi</option>
                 <option value="01">SD</option>
@@ -275,6 +319,7 @@ const SantriPage = () => {
                 value={newSantri.registration_year}
                 onChange={handleInputChange}
                 className="p-2 border rounded"
+                required
               >
                 <option value="">Pilih tahun masuk</option>
                 <option value="22">2022</option>
@@ -431,9 +476,9 @@ const SantriPage = () => {
               className="p-2 border rounded"
             >
               <option value="">Pilih Jenjang Studi</option>
-              <option value="01">SD</option>
-              <option value="02">SMP</option>
-              <option value="03">SMA</option>
+              <option value="01" >SD</option>
+              <option value="02" >SMP</option>
+              <option value="03" >SMA</option>
             </select>
 
             <select
