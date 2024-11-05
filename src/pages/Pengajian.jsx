@@ -7,6 +7,7 @@ import Modal from 'react-modal';
 import Cookies from 'universal-cookie';
 import { jwtDecode } from "jwt-decode";
 import e from 'cors';
+import { useEffect } from 'react';
 
 Modal.setAppElement('#root');
 
@@ -14,6 +15,7 @@ export default function Pengajian() {
     const [isOpen, setIsOpen] = useState(false);
     const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
     const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+
     const [isAddModalOpen, setIsAddModalOpen] = useState(false);
     const [selectedPengajian, setSelectedPengajian] = useState(null);
     const [kitabFile, setKitabFile] = useState(null);
@@ -29,11 +31,7 @@ export default function Pengajian() {
     // Handle perubahan input form
     const handleInputChange = (e) => {
         const { name, value, files } = e.target;
-        if (name === 'kitab') {
-            setPengajianData({ ...pengajianData, kitab: files[0] });
-        } else {
-            setPengajianData({ ...pengajianData, [name]: value });
-        }
+        setPengajianData({ ...pengajianData, [name]: value });
     };
 
     // Handle submit untuk mengirim data
@@ -60,6 +58,7 @@ export default function Pengajian() {
                     nama: pengajianData.nama,
                     nama_pengasuh: pengajianData.nama_pengasuh,
                     hari: pengajianData.hari,
+                    kitab: pengajianData.kitab
                 }),
             });
 
@@ -67,7 +66,7 @@ export default function Pengajian() {
                 throw new Error('Gagal menyimpan data pengajian');
             }
 
-            alert('Data pengajian berhasil disimpan');
+            fetchData();
             setIsAddModalOpen(false);
         } catch (error) {
             console.error('Error:', error);
@@ -82,18 +81,39 @@ export default function Pengajian() {
         navigate('/login');
         return null;
     }
+    const [pengajianList, setPengajianList] = useState([]);
+
+    const fetchData = async () => {
+        try {
+            const response = await fetch('http://localhost:4100/api/pengajian');
+            if (!response.ok) {
+                throw new Error('Gagal mengambil data pengajian');
+
+            }
+            const data = await response.json();
+
+            setPengajianList(data);
+        } catch (error) {
+            console.error('Error:', error);
+            alert('Gagal mengambil data pengajian: ' + error.message);
+        }
+    };
+
+    useEffect(() => {
+        fetchData();
+    }, []);
 
     // Daftar pengajian (dummy data)
-    const pengajianList = [
-        {
-            id: 1,
-            nama: 'Pengajian Rutin',
-            pengasuh: 'Ustadz Abdul',
-            hari: 'Senin',
-            kitab: 'kitab_rutin.pdf',
-            kitabLink: '/uploads/kitab_rutin.pdf'
-        }
-    ];
+    // const pengajianList = [
+    //     {
+    //         id: 1,
+    //         nama: 'Pengajian Rutin',
+    //         pengasuh: 'Ustadz Abdul',
+    //         hari: 'Senin',
+    //         kitab: 'kitab_rutin.pdf',
+    //         kitabLink: '/uploads/kitab_rutin.pdf'
+    //     }
+    // ];
 
 
     // Membuka modal tambah pengajian
@@ -116,6 +136,25 @@ export default function Pengajian() {
     // Menyimpan file kitab dari input file
     const handleKitabFileChange = (e) => {
         setKitabFile(e.target.files[0]);
+    };
+
+    const deletePengajian = async (id) => {
+        try {
+            const response = await fetch(`http://localhost:4100/api/pengajian/${id}`, {
+                method: 'DELETE',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+            });
+            const data = await response.json();
+            if (response.status === 200) {
+                fetchData();
+            } else {
+                alert('Gagal menghapus data');
+            }
+        } catch (error) {
+            console.error(error);
+        }
     };
 
     return (
@@ -168,18 +207,17 @@ export default function Pengajian() {
                             <tr key={pengajian.id}>
                                 <td className="border px-4 py-2">{pengajian.hari}</td>
                                 <td className="border px-4 py-2">{pengajian.nama}</td>
-                                <td className="border px-4 py-2">{pengajian.pengasuh}</td>
-                                <td className="border px-4 py-2">
-                                    <a
-                                        href={pengajian.kitabLink}
-                                        target="_blank"
-                                        rel="noopener noreferrer"
-                                        className="text-blue-500 underline"
-                                    >
-                                        {pengajian.kitab}
-                                    </a>
-                                </td>
+                                <td className="border px-4 py-2">{pengajian.nama_pengasuh}</td>
+                                <td className="border px-4 py-2">{pengajian.kitab}</td>
                                 <td className="border px-4 py-2 flex gap-2">
+                                    <button
+                                        onClick={() => deletePengajian(pengajian.id)}
+                                        className='bg-red-500 text-white px-3 py-1 rounded hover:bg-red-600 transition-colors'
+                                    >
+                                        Hapus
+                                    </button>
+
+
                                     <button
                                         onClick={() => handleDetailPengajian(pengajian)}
                                         className="bg-green-500 text-white px-3 py-1 rounded hover:bg-green-600 transition-colors"
@@ -245,8 +283,9 @@ export default function Pengajian() {
                     <div className="mb-4">
                         <label className="block text-sm font-medium text-gray-700">Kitab</label>
                         <input
-                            type="file"
+                            type="text"
                             name="kitab"
+                            value={pengajianData.kitab}
                             onChange={handleInputChange}
                             className="w-full p-2 border rounded-md focus:outline-none"
                         />
