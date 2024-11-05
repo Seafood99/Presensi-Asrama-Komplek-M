@@ -6,6 +6,7 @@ import Clock from '../components/Clock';
 import Modal from 'react-modal';
 import Cookies from 'universal-cookie';
 import { jwtDecode } from "jwt-decode";
+import e from 'cors';
 
 Modal.setAppElement('#root');
 
@@ -18,6 +19,59 @@ export default function Pengajian() {
     const [kitabFile, setKitabFile] = useState(null);
     const cookies = new Cookies();
     const token = cookies.get('token');
+    const [pengajianData, setPengajianData] = useState({
+        nama: '',
+        nama_pengasuh: '',
+        hari: '',
+        kitab: ''
+    });
+
+    // Handle perubahan input form
+    const handleInputChange = (e) => {
+        const { name, value, files } = e.target;
+        if (name === 'kitab') {
+            setPengajianData({ ...pengajianData, kitab: files[0] });
+        } else {
+            setPengajianData({ ...pengajianData, [name]: value });
+        }
+    };
+
+    // Handle submit untuk mengirim data
+    const handleSubmit = async (e) => {
+        e.preventDefault();
+
+        // Membuat FormData untuk mengirim data file
+        const formData = new FormData();
+        formData.append('nama', pengajianData.nama);
+        formData.append('nama_pengasuh', pengajianData.nama_pengasuh);
+        formData.append('hari', pengajianData.hari);
+        console.log(pengajianData);
+        if (pengajianData.kitab) {
+            formData.append('kitab', pengajianData.kitab);
+        }
+
+        try {
+            const response = await fetch('http://localhost:4100/api/pengajian', {
+                method: 'POST',
+                body: JSON.stringify({
+                    nama: pengajianData.nama,
+                    nama_pengasuh: pengajianData.nama_pengasuh,
+                    hari: pengajianData.hari,
+                }),
+            });
+
+            if (!response.ok) {
+                throw new Error('Gagal menyimpan data pengajian');
+            }
+
+            alert('Data pengajian berhasil disimpan');
+            setIsAddModalOpen(false);
+        } catch (error) {
+            console.error('Error:', error);
+            alert('Gagal menyimpan data pengajian: ' + error.message);
+        }
+    };
+
 
     // Mengambil data user dari token
     const user = token ? jwtDecode(token).data : null;
@@ -37,6 +91,7 @@ export default function Pengajian() {
             kitabLink: '/uploads/kitab_rutin.pdf'
         }
     ];
+
 
     // Membuka modal tambah pengajian
     const handleAddPengajian = () => {
@@ -153,24 +208,43 @@ export default function Pengajian() {
             >
                 <h2 className="text-xl font-bold mb-4">Tambah Pengajian</h2>
                 {/* Form tambah pengajian */}
-                <form>
+                <form onSubmit={handleSubmit}>
                     <div className="mb-4">
                         <label className="block text-sm font-medium text-gray-700">Hari</label>
-                        <input type="text" className="w-full p-2 border rounded-md focus:outline-none" />
+                        <input
+                            type="text"
+                            name="hari"
+                            value={pengajianData.hari}
+                            onChange={handleInputChange}
+                            className="w-full p-2 border rounded-md focus:outline-none"
+                        />
                     </div>
                     <div className="mb-4">
                         <label className="block text-sm font-medium text-gray-700">Nama Pengajian</label>
-                        <input type="text" className="w-full p-2 border rounded-md focus:outline-none" />
+                        <input
+                            type="text"
+                            name="nama"
+                            value={pengajianData.nama}
+                            onChange={handleInputChange}
+                            className="w-full p-2 border rounded-md focus:outline-none"
+                        />
                     </div>
                     <div className="mb-4">
                         <label className="block text-sm font-medium text-gray-700">Pengasuh</label>
-                        <input type="text" className="w-full p-2 border rounded-md focus:outline-none" />
+                        <input
+                            type="text"
+                            name="nama_pengasuh"
+                            value={pengajianData.nama_pengasuh}
+                            onChange={handleInputChange}
+                            className="w-full p-2 border rounded-md focus:outline-none"
+                        />
                     </div>
                     <div className="mb-4">
                         <label className="block text-sm font-medium text-gray-700">Kitab</label>
                         <input
                             type="file"
-                            onChange={handleKitabFileChange}
+                            name="kitab"
+                            onChange={handleInputChange}
                             className="w-full p-2 border rounded-md focus:outline-none"
                         />
                     </div>
