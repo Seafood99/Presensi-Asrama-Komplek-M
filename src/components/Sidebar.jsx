@@ -2,15 +2,16 @@ import React, { useState } from 'react';
 import { NavLink } from 'react-router-dom';
 import Modal from 'react-modal';
 import Swal from 'sweetalert2';
+import { useApiUrl } from '../helpers/apiUrl';
+import Cookies from 'universal-cookie';
 
-const Sidebar = ({ user, opened }) => {
+const Sidebar = ({ user, opened }) => { 
+    const cookies = new Cookies();
     const [isEditProfileOpen, setIsEditProfileOpen] = useState(false);
-    const [newProfile, setNewProfile] = useState({ oldPassword: '', newPassword: '', profilePicture: null });
-
+    const [newProfile, setNewProfile] = useState({ oldPassword: '', newPassword: '', profilePicture: [] });
     const handleEditProfile = () => {
         setIsEditProfileOpen(true);
     };
-
     const handleCloseModal = () => {
         setIsEditProfileOpen(false);
     };
@@ -23,7 +24,7 @@ const Sidebar = ({ user, opened }) => {
             setNewProfile((prevState) => ({ ...prevState, [name]: value }));
         }
     };
-
+    const url = useApiUrl();
     const handleSaveProfile = () => {
         Swal.fire({
             title: 'Apakah Anda yakin?',
@@ -32,15 +33,26 @@ const Sidebar = ({ user, opened }) => {
             showCancelButton: true,
             confirmButtonText: 'Ya, simpan',
             cancelButtonText: 'Batal',
-        }).then((result) => {
+        }).then(async(result) => {
             if (result.isConfirmed) {
-                console.log('New Profile Data:', newProfile);
+                const formData = new FormData();
+                formData.append('oldPassword', newProfile.oldPassword);
+                formData.append('newPassword', newProfile.newPassword);
+                formData.append('profilePicture', newProfile.profilePicture);
+                const request = await fetch(url + "/api/santri" + "/" + user.nis, {
+                    headers: {
+                        'Authorization': `Bearer ${cookies.get('token')}`,
+                    },
+                    method: 'PUT',
+                    body: formData,
+                })
+                const result = await request.json();
+                console.log(result);
                 Swal.fire('Tersimpan!', 'Profil telah berhasil disimpan.', 'success');
                 handleCloseModal();
             }
         });
     };
-
     return (
         <div className={`
             fixed
