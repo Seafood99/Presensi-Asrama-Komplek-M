@@ -64,11 +64,14 @@ const Login = () => {
 
     return (
         <div className="min-h-screen flex items-center justify-center bg-teal-900">
-            <div className="bg-white p-10 rounded-md shadow-md w-full max-w-sm">
+            <div className="bg-white p-10 rounded-md shadow-md w-full md:max-w-2xl max-w-sm">
                 {/* Logo Pesantren */}
-                <div className="flex justify-center mb-6">
+                <div className="flex justify-center items-center gap-4 mb-6">
                     <img src="/logo.png" alt="Logo pesantren" className="w-32 h-auto" />
                 </div>
+
+                {/* menambahkan tulisan "Sistem Informasi Akademik Komplek M Al-Busyro" */}
+                <h1 className="text-2xl font-bold text-center mb-6">Sistem Informasi Akademik Komplek M Al-Busyro</h1>
 
                 {/* Form login */}
                 <form onSubmit={handleLogin}>

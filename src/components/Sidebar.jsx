@@ -114,6 +114,18 @@ const Sidebar = ({ user, opened }) => {
                             <span>Presensi</span>
                         </NavLink>
                     </li>
+                    {/* membuat tombol untuk mengarahkan ke halaman pengajian */}
+                    <li className="mb-2">
+                        <NavLink
+                            to="/pengajian"
+                            className={({ isActive }) =>
+                                `flex items-center p-2 rounded ${isActive ? 'bg-teal-700' : 'hover:bg-teal-600'} text-white`
+                            }
+                        >
+                            <img src="/books.png" alt="Logo Pengajian" className="w-6 h-6 mr-2" style={{ filter: 'invert(1)' }} />
+                            <span>Pengajian</span>
+                        </NavLink>        
+                    </li>
                     {user.role === 'admin' && (
                         <li className="mb-2">
                             <NavLink
