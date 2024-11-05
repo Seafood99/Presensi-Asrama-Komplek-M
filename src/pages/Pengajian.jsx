@@ -53,6 +53,9 @@ export default function Pengajian() {
         try {
             const response = await fetch('http://localhost:4100/api/pengajian', {
                 method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
                 body: JSON.stringify({
                     nama: pengajianData.nama,
                     nama_pengasuh: pengajianData.nama_pengasuh,
