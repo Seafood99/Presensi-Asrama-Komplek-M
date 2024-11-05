@@ -155,15 +155,15 @@ export default function Pengajian() {
                 {/* Form tambah pengajian */}
                 <form>
                     <div className="mb-4">
+                        <label className="block text-sm font-medium text-gray-700">Hari</label>
+                        <input type="text" className="w-full p-2 border rounded-md focus:outline-none" />
+                    </div>
+                    <div className="mb-4">
                         <label className="block text-sm font-medium text-gray-700">Nama Pengajian</label>
                         <input type="text" className="w-full p-2 border rounded-md focus:outline-none" />
                     </div>
                     <div className="mb-4">
                         <label className="block text-sm font-medium text-gray-700">Pengasuh</label>
-                        <input type="text" className="w-full p-2 border rounded-md focus:outline-none" />
-                    </div>
-                    <div className="mb-4">
-                        <label className="block text-sm font-medium text-gray-700">Hari</label>
                         <input type="text" className="w-full p-2 border rounded-md focus:outline-none" />
                     </div>
                     <div className="mb-4">
