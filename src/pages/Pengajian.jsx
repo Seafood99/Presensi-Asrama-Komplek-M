@@ -6,7 +6,6 @@ import Clock from '../components/Clock';
 import Modal from 'react-modal';
 import Cookies from 'universal-cookie';
 import { jwtDecode } from "jwt-decode";
-import e from 'cors';
 import { useEffect } from 'react';
 import { useApiUrl } from '../helpers/apiUrl';
 
@@ -51,7 +50,7 @@ export default function Pengajian() {
         }
 
         try {
-            const response = await fetch('http://localhost:4100/api/pengajian', {
+            const response = await fetch(`${url}/api/pengajian`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
@@ -104,19 +103,6 @@ export default function Pengajian() {
     useEffect(() => {
         fetchData();
     }, []);
-
-    // Daftar pengajian (dummy data)
-    // const pengajianList = [
-    //     {
-    //         id: 1,
-    //         nama: 'Pengajian Rutin',
-    //         pengasuh: 'Ustadz Abdul',
-    //         hari: 'Senin',
-    //         kitab: 'kitab_rutin.pdf',
-    //         kitabLink: '/uploads/kitab_rutin.pdf'
-    //     }
-    // ];
-
 
     // Membuka modal tambah pengajian
     const handleAddPengajian = () => {
