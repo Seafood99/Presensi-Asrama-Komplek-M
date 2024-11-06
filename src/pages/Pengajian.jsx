@@ -8,10 +8,12 @@ import Cookies from 'universal-cookie';
 import { jwtDecode } from "jwt-decode";
 import e from 'cors';
 import { useEffect } from 'react';
+import { useApiUrl } from '../helpers/apiUrl';
 
 Modal.setAppElement('#root');
 
 export default function Pengajian() {
+    const url = useApiUrl()
     const [isOpen, setIsOpen] = useState(false);
     const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
     const [isEditModalOpen, setIsEditModalOpen] = useState(false);
@@ -85,7 +87,7 @@ export default function Pengajian() {
 
     const fetchData = async () => {
         try {
-            const response = await fetch('http://localhost:4100/api/pengajian');
+            const response = await fetch(`${url}/api/pengajian`); 
             if (!response.ok) {
                 throw new Error('Gagal mengambil data pengajian');
 
@@ -140,7 +142,7 @@ export default function Pengajian() {
 
     const deletePengajian = async (id) => {
         try {
-            const response = await fetch(`http://localhost:4100/api/pengajian/${id}`, {
+            const response = await fetch(`${url}/api/pengajian/${id}`, {
                 method: 'DELETE',
                 headers: {
                     'Content-Type': 'application/json',
